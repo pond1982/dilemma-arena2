@@ -3,11 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prisoner's Dilemma Simulator: Axelrod Tournament &amp; Tit for Tat</title>
+<meta name="description" content="Play the prisoner's dilemma, watch Tit for Tat and 13 other classic strategies compete in Axelrod-style tournaments and evolution, and build your own. Free, in your browser.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="https://pond1982.github.io/prisoners-dilemma/en/">
+<link rel="alternate" hreflang="en" href="https://pond1982.github.io/prisoners-dilemma/en/">
+<link rel="alternate" hreflang="th" href="https://pond1982.github.io/prisoners-dilemma/">
+<link rel="alternate" hreflang="x-default" href="https://pond1982.github.io/prisoners-dilemma/en/">
+<meta name="author" content="Suwitcha “Pondd” Sugthana">
+<link rel="author" href="https://pond1982.github.io/Pondd-Page/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Prisoner's Dilemma Arena">
+<meta property="og:title" content="When does it pay to be nice? Play the prisoner's dilemma">
+<meta property="og:description" content="Choose to cooperate or defect, then see why nice-but-firm strategies like Tit for Tat won Axelrod's famous tournament. Game theory you can play.">
+<meta property="og:url" content="https://pond1982.github.io/prisoners-dilemma/en/">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="th_TH">
+<meta property="og:image" content="https://pond1982.github.io/prisoners-dilemma/og-en.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Prisoner's Dilemma Arena: play the prisoner's dilemma and run Axelrod's tournament">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image:alt" content="Prisoner's Dilemma Arena: play the prisoner's dilemma and run Axelrod's tournament">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F3F2F7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#110F18" media="(prefers-color-scheme: dark)">
-<title>Prisoner's Dilemma Arena</title>
-<meta name="description" content="Play the repeated prisoner's dilemma, watch classic strategies face off, run Axelrod-style tournaments and evolution, and build your own strategy.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Recursive:slnt,wght,CASL,CRSV,MONO@-15..0,300..1000,0..1,0..1,0..1&display=swap">
@@ -480,16 +503,6 @@ textarea.text-input { font-size: 14px; font-weight: 500; resize: vertical; font-
   *, *::before, *::after { animation-duration: .001ms !important; animation-delay: 0ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
 }
 </style>
-<meta property="og:type" content="website">
-<meta property="og:title" content="Prisoner's Dilemma Arena">
-<meta property="og:description" content="Play the repeated prisoner's dilemma, watch classic strategies face off, run Axelrod-style tournaments and evolution, and build your own strategy.">
-<meta property="og:locale" content="en_US">
-<meta name="twitter:card" content="summary">
-<meta name="author" content="Suwitcha “Pondd” Sugthana">
-<link rel="author" href="https://pond1982.github.io/Pondd-Page/">
-<link rel="icon" href="../favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="../apple-touch-icon.png">
-<link rel="alternate" hreflang="th" href="../">
 <style>
 :root { padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
 img { max-width: 100%; }
@@ -508,7 +521,190 @@ img { max-width: 100%; }
 .credit a { color: var(--ink); font-weight: 600; white-space: nowrap; text-decoration: underline; text-decoration-color: var(--line-strong); text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
 .credit a:hover { text-decoration-color: currentColor; }
 .credit svg { width: 11px; height: 11px; margin-left: 5px; }
+.faq { margin-top: 112px; scroll-margin-top: 96px; }
+.faq-head { max-width: 720px; margin-bottom: 28px; }
+.faq-head .lede { margin-top: 10px; }
+.faq-list { display: grid; gap: 12px; max-width: 900px; }
+.faq-item { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow-1, none); transition: border-color .15s; }
+.faq-item:hover { border-color: var(--line-strong); }
+.faq-item > summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px 18px 24px; border-radius: 20px; cursor: pointer; }
+.faq-item > summary::-webkit-details-marker { display: none; }
+.faq-q { margin: 0; }
+.faq-toggle { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); transition: transform .2s ease; }
+.faq-toggle svg { width: 14px; height: 14px; }
+.faq-item[open] .faq-toggle { transform: rotate(180deg); }
+.faq-a { max-width: 74ch; padding: 0 24px 22px; color: var(--ink-2); }
+.faq-a p + p { margin-top: 10px; }
+@media (max-width: 600px) { .faq { margin-top: 72px; } .faq-item > summary { padding: 15px 14px 15px 18px; } .faq-a { padding: 0 18px 18px; } }
+@media (prefers-reduced-motion: reduce) { .faq-toggle { transition: none; } }
 </style>
+<style>
+.h1-kicker { display: block; width: fit-content; margin: 0 0 18px; padding: 5px 12px; border-radius: 999px; font-size: 14px; font-weight: 700; line-height: 1.3; letter-spacing: 0.01em; color: var(--defect); background: var(--defect-wash); font-variation-settings: "CASL" 0, "MONO" 0; }
+</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "WebSite",
+   "@id": "https://pond1982.github.io/prisoners-dilemma/#website",
+   "url": "https://pond1982.github.io/prisoners-dilemma/",
+   "name": "ร่วมมือหรือหักหลัง",
+   "alternateName": [
+    "Prisoner's Dilemma Arena",
+    "Dilemma Arena",
+    "ความลำบากใจของนักโทษ"
+   ],
+   "inLanguage": [
+    "th",
+    "en"
+   ],
+   "creator": {
+    "@id": "https://pond1982.github.io/Pondd-Page/#person"
+   }
+  },
+  {
+   "@type": [
+    "WebApplication",
+    "LearningResource"
+   ],
+   "@id": "https://pond1982.github.io/prisoners-dilemma/en/#app",
+   "url": "https://pond1982.github.io/prisoners-dilemma/en/",
+   "name": "Prisoner's Dilemma Arena",
+   "description": "Play the prisoner's dilemma, watch Tit for Tat and 13 other classic strategies compete in Axelrod-style tournaments and evolution, and build your own. Free, in your browser.",
+   "inLanguage": "en",
+   "image": "https://pond1982.github.io/prisoners-dilemma/og-en.png",
+   "isPartOf": {
+    "@id": "https://pond1982.github.io/prisoners-dilemma/#website"
+   },
+   "applicationCategory": "EducationalApplication",
+   "operatingSystem": "Any",
+   "browserRequirements": "Requires JavaScript",
+   "isAccessibleForFree": true,
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+   },
+   "learningResourceType": "Interactive simulation",
+   "educationalLevel": "Beginner",
+   "teaches": [
+    "Prisoner's dilemma",
+    "Game theory",
+    "Tit for Tat",
+    "Axelrod's tournament",
+    "Evolution of cooperation"
+   ],
+   "about": [
+    {
+     "@type": "Thing",
+     "name": "Prisoner's dilemma",
+     "sameAs": [
+      "https://en.wikipedia.org/wiki/Prisoner%27s_dilemma",
+      "https://th.wikipedia.org/wiki/%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%A5%E0%B8%B3%E0%B8%9A%E0%B8%B2%E0%B8%81%E0%B9%83%E0%B8%88%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B9%82%E0%B8%97%E0%B8%A9"
+     ]
+    },
+    {
+     "@type": "Thing",
+     "name": "Game theory",
+     "sameAs": "https://en.wikipedia.org/wiki/Game_theory"
+    },
+    {
+     "@type": "Thing",
+     "name": "Tit for tat",
+     "sameAs": "https://en.wikipedia.org/wiki/Tit_for_tat"
+    },
+    {
+     "@type": "Thing",
+     "name": "The Evolution of Cooperation",
+     "sameAs": "https://en.wikipedia.org/wiki/The_Evolution_of_Cooperation"
+    }
+   ],
+   "author": {
+    "@id": "https://pond1982.github.io/Pondd-Page/#person"
+   },
+   "creator": {
+    "@id": "https://pond1982.github.io/Pondd-Page/#person"
+   },
+   "datePublished": "2026-09-27",
+   "dateModified": "2026-09-27"
+  },
+  {
+   "@type": "Person",
+   "@id": "https://pond1982.github.io/Pondd-Page/#person",
+   "name": "Suwitcha Sugthana",
+   "alternateName": "Pondd",
+   "url": "https://pond1982.github.io/Pondd-Page/",
+   "sameAs": [
+    "https://github.com/pond1982"
+   ]
+  },
+  {
+   "@type": "FAQPage",
+   "@id": "https://pond1982.github.io/prisoners-dilemma/en/#faq",
+   "inLanguage": "en",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "What is the prisoner’s dilemma?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "The prisoner’s dilemma is a two-player game from game theory. Both players choose at the same moment to cooperate or defect, without seeing the other’s choice. If both cooperate, each gets 3 points. If both defect, each gets 1. If one defects while the other cooperates, the defector gets 5 and the cooperator gets 0. It’s a dilemma because in any single round defecting pays more, yet if both players reason that way, both end up worse off than if they had cooperated. Merrill Flood and Melvin Dresher devised the game at the RAND Corporation in 1950, and Albert W. Tucker gave it the prisoner story and its name."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Why is defecting the “rational” choice?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Whatever the other player does, defecting earns you more: 5 instead of 3 if they cooperate, 1 instead of 0 if they defect. So defection is each player’s dominant strategy, and mutual defection is the game’s only Nash equilibrium: neither player can do better by changing their move alone. Yet mutual cooperation would give each of them 3 points instead of 1."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "What was Axelrod’s tournament, and who won?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "In 1980 Robert Axelrod, a political scientist at the University of Michigan, invited game theorists to submit computer programs to play the repeated game in a round robin. Fourteen programs, plus one that moved at random, met in 200-round matches. The simplest program won: Tit for Tat, submitted by Anatol Rapoport. In a second tournament, 62 entrants knew that result and many tried to beat it. Tit for Tat won again."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "How does Tit for Tat work, and why does it win?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "It cooperates on the first move, then copies whatever the other player did last. Axelrod found four habits shared by the strategies that did well. They are nice (never the first to defect), retaliatory (they hit back right away), forgiving (they return to cooperation as soon as the other player does) and clear (they are easy to read, so others learn that cooperating pays). Tit for Tat never beats a single opponent head to head. It wins on total points by getting others to cooperate."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "How can cooperation emerge among selfish players?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Through repetition. When you will meet the same player again, a defection today can cost you cooperation for many rounds to come. Axelrod called this the shadow of the future. In evolutionary simulations, where strategies that score well get more copies in the next generation, strategies that cooperate but can’t be exploited spread until they dominate the population."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Where does the prisoner’s dilemma show up in real life?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Price wars, arms races, overfishing, climate agreements in which every country would rather the others cut emissions first, and group projects where everyone hopes someone else will do the work. In the trenches of the First World War, units that faced each other day after day often held back from killing one another without any official truce, a pattern known as the live-and-let-live system. Axelrod describes it in The Evolution of Cooperation (1984)."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Can I build my own strategy?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes. Click Build a strategy, set its opening moves and the rules it follows each round after that, then enter it in a head-to-head match, a tournament or an evolution run. Strategies are saved in your browser, and you can share them with a code that works in both the English and Thai versions. Everything runs in your browser: it’s free, with no sign-up."
+     }
+    }
+   ]
+  }
+ ]
+}
+</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -548,7 +744,7 @@ img { max-width: 100%; }
   <section class="view" id="view-play" role="tabpanel" aria-labelledby="tab-play">
     <div class="wrap">
       <div class="hero-head">
-        <h1 class="display">When does it pay to be nice?</h1>
+        <h1 class="display"><span class="h1-kicker">The prisoner’s dilemma<span class="sr-only">: </span></span>When does it pay to be nice?</h1>
         <p class="lede">Each round, you and a mystery program both choose to cooperate or defect at the same moment. Neither of you sees the other&rsquo;s choice until both are made. Play ten rounds and try to finish ahead.</p>
       </div>
 
@@ -652,6 +848,42 @@ img { max-width: 100%; }
           <button class="btn btn-primary btn-lg" type="button" data-goto="tournament">Run the tournament</button>
           <button class="btn btn-lg" type="button" data-action="new-strategy">Build your own strategy</button>
           <button class="btn btn-lg" type="button" data-goto="match">Watch a match</button>
+        </div>
+      </section>
+      <section class="faq" id="faq" aria-labelledby="faq-title">
+        <div class="faq-head">
+          <h2 class="h2" id="faq-title">Frequently asked questions</h2>
+          <p class="lede">Short answers, if you want the quick version.</p>
+        </div>
+        <div class="faq-list">
+          <details class="faq-item" open>
+            <summary><h3 class="h3 faq-q">What is the prisoner’s dilemma?</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>The prisoner’s dilemma is a two-player game from game theory. Both players choose at the same moment to cooperate or defect, without seeing the other’s choice. If both cooperate, each gets 3 points. If both defect, each gets 1. If one defects while the other cooperates, the defector gets 5 and the cooperator gets 0.</p><p>It’s a dilemma because in any single round defecting pays more, yet if both players reason that way, both end up worse off than if they had cooperated. Merrill Flood and Melvin Dresher devised the game at the RAND Corporation in 1950, and Albert W. Tucker gave it the prisoner story and its name.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary><h3 class="h3 faq-q">Why is defecting the “rational” choice?</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>Whatever the other player does, defecting earns you more: 5 instead of 3 if they cooperate, 1 instead of 0 if they defect. So defection is each player’s dominant strategy, and mutual defection is the game’s only Nash equilibrium: neither player can do better by changing their move alone. Yet mutual cooperation would give each of them 3 points instead of 1.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary><h3 class="h3 faq-q">What was Axelrod’s tournament, and who won?</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>In 1980 Robert Axelrod, a political scientist at the University of Michigan, invited game theorists to submit computer programs to play the repeated game in a round robin. Fourteen programs, plus one that moved at random, met in 200-round matches.</p><p>The simplest program won: Tit for Tat, submitted by Anatol Rapoport. In a second tournament, 62 entrants knew that result and many tried to beat it. Tit for Tat won again.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary><h3 class="h3 faq-q">How does Tit for Tat work, and why does it win?</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>It cooperates on the first move, then copies whatever the other player did last.</p><p>Axelrod found four habits shared by the strategies that did well. They are nice (never the first to defect), retaliatory (they hit back right away), forgiving (they return to cooperation as soon as the other player does) and clear (they are easy to read, so others learn that cooperating pays). Tit for Tat never beats a single opponent head to head. It wins on total points by getting others to cooperate.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary><h3 class="h3 faq-q">How can cooperation emerge among selfish players?</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>Through repetition. When you will meet the same player again, a defection today can cost you cooperation for many rounds to come. Axelrod called this the shadow of the future.</p><p>In evolutionary simulations, where strategies that score well get more copies in the next generation, strategies that cooperate but can’t be exploited spread until they dominate the population.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary><h3 class="h3 faq-q">Where does the prisoner’s dilemma show up in real life?</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>Price wars, arms races, overfishing, climate agreements in which every country would rather the others cut emissions first, and group projects where everyone hopes someone else will do the work.</p><p>In the trenches of the First World War, units that faced each other day after day often held back from killing one another without any official truce, a pattern known as the live-and-let-live system. Axelrod describes it in The Evolution of Cooperation (1984).</p></div>
+          </details>
+          <details class="faq-item">
+            <summary><h3 class="h3 faq-q">Can I build my own strategy?</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>Yes. Click Build a strategy, set its opening moves and the rules it follows each round after that, then enter it in a head-to-head match, a tournament or an evolution run.</p><p>Strategies are saved in your browser, and you can share them with a code that works in both the English and Thai versions. Everything runs in your browser: it’s free, with no sign-up.</p></div>
+          </details>
         </div>
       </section>
     </div>

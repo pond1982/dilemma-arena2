@@ -1,51 +1,54 @@
 # ร่วมมือหรือหักหลัง · Prisoner's Dilemma Arena
 
+**Play it:** [ภาษาไทย](https://pond1982.github.io/prisoners-dilemma/) · [English](https://pond1982.github.io/prisoners-dilemma/en/)
+
+An interactive, bilingual (Thai and English) explainer and simulator of the **prisoner's dilemma** (ความลำบากใจของนักโทษ) and **Axelrod's tournament**. You can play the game yourself and watch 14 classic strategies, such as **Tit for Tat**, face off. You can run round-robin tournaments and evolutionary simulations, and build your own strategy. It all runs in the browser, free and with no sign-up.
+
 Created by [Suwitcha “Pondd” Sugthana](https://pond1982.github.io/Pondd-Page/).
 
-An interactive explainer of the repeated prisoner's dilemma and Axelrod's strategy tournaments. You can play a few rounds yourself, watch classic strategies face each other, run round-robin tournaments and evolution, and build your own strategy.
-
-- **Thai** (home page): `index.html`
-- **English**: `en/index.html`
-
-Each page has a language switch in its top bar that keeps the tab you're on.
+![Prisoner's Dilemma Arena: play the prisoner's dilemma and run Axelrod's tournament](og-en.png)
 
 ## What's in this folder
 
 | File | What it is |
 | --- | --- |
-| `index.html` | The Thai site |
+| `index.html` | The Thai site (home page) |
 | `en/index.html` | The English site |
+| `sitemap.xml` | Both pages and their language alternates, for search engines |
+| `og-th.png`, `og-en.png` | Link-preview images for LINE, Facebook, X, LinkedIn and chat apps |
 | `favicon.svg`, `apple-touch-icon.png` | Browser-tab and home-screen icons |
-| `.nojekyll` | A hidden, empty file that tells GitHub Pages to serve the files as they are. If your upload leaves it out, the site still works. |
+| `.nojekyll` | Tells GitHub Pages to serve the files as they are |
 
-It's a static site with no build step and no dependencies. Everything runs in the visitor's browser, and only the fonts come from Google Fonts. To preview it locally, double-click `index.html`.
+It's a static site with no build step and no dependencies. Only the fonts come from Google Fonts.
 
-## Publish on GitHub Pages
+## Search and sharing setup (already in the pages)
 
-1. Create a new **public** repository on GitHub, for example `dilemma-arena`. On a free account, Pages needs a public repository.
-2. On the repository page, choose **Add file → Upload files**. Drag the *contents* of this folder into the page (`index.html`, the `en` folder and the icons), not the folder itself. Then click **Commit changes**.
-3. Open **Settings → Pages**. Under **Build and deployment**, set **Source** to **Deploy from a branch**, choose **main** and **/ (root)**, then click **Save**.
-4. After a minute or two the site is live at:
-   - Thai: `https://<your-username>.github.io/dilemma-arena/`
-   - English: `https://<your-username>.github.io/dilemma-arena/en/`
+- Titles and descriptions in Thai and English built around what people search for, such as "prisoner's dilemma คือ", ความลำบากใจของนักโทษ, ทฤษฎีเกม, Axelrod tournament and Tit for Tat.
+- A canonical URL and `hreflang` links on each page, so Google shows the Thai page to Thai searchers and the English page to everyone else.
+- Open Graph and X card tags with 1200×630 preview images, one per language.
+- Structured data (schema.org JSON-LD): `WebSite`, `WebApplication` + `LearningResource`, `Person` (creator) and `FAQPage`.
+- A visible FAQ at the end of the first tab of each page, answering common questions. Its text matches the `FAQPage` data.
+- `sitemap.xml`
 
-If you name the repository `<your-username>.github.io`, the site is served from `https://<your-username>.github.io/` instead.
+## Help people find it (one-time steps)
 
-To update the site later, upload the changed file again with the same name and commit. Pages redeploys automatically.
+1. **Google Search Console** (<https://search.google.com/search-console>)
+   1. Choose **Add property → URL prefix** and enter `https://pond1982.github.io/prisoners-dilemma/`.
+   2. Pick the **HTML file** method. Download the `google….html` file, upload it to the root of this repo, and click **Verify**.
+   3. Open **Sitemaps**, enter `sitemap.xml` and submit.
+   4. In **URL Inspection**, click **Request indexing** for both pages.
+2. **Bing Webmaster Tools** (<https://www.bing.com/webmasters>): sign in and choose **Import from Google Search Console**. Bing's index also supplies other search engines and AI assistants.
+3. **Link to it from pages you already have**: your Pondd-Page portfolio, LinkedIn and Facebook. Search engines find a new site fastest through links on pages they already crawl.
+4. **Share it where the topic comes up**: Thai Facebook groups on economics or teaching, Pantip, LINE, r/GameTheory on Reddit, or a "Show HN" post on Hacker News. Each share shows the preview image.
 
-If you use git instead:
+## Updating
 
-```bash
-cd dilemma-arena
-git init -b main
-git add .
-git commit -m "Prisoner's Dilemma Arena"
-git remote add origin https://github.com/<your-username>/dilemma-arena.git
-git push -u origin main
-```
+Replace the files and commit. GitHub Pages redeploys in a minute or two.
+
+The site's address is written into `index.html`, `en/index.html` and `sitemap.xml` (canonical, `hreflang`, `og:url` and preview-image links). If the address ever changes, update it in all three.
 
 ## Notes
 
 - Strategies people build are saved in their own browser (localStorage). Nothing is sent to a server.
 - Share codes (`PDA1.…`) work in both the Thai and English versions.
-- Links to a specific tab work, for example `…/dilemma-arena/#tournament` or `…/en/#evolution`.
+- You can link to a specific tab, for example `…/prisoners-dilemma/#tournament` or `…/prisoners-dilemma/en/#evolution`.

@@ -3,11 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ความลำบากใจของนักโทษ (Prisoner's Dilemma) คืออะไร · ลองเล่นและจำลองทฤษฎีเกม</title>
+<meta name="description" content="เข้าใจความลำบากใจของนักโทษ (Prisoner's Dilemma) ทีละขั้นแบบเล่นได้จริง ดูกลยุทธ์อย่างตาต่อตา (Tit for Tat) ดวลกัน จัดทัวร์นาเมนต์แบบแอ็กเซลรอด จำลองวิวัฒนาการ และสร้างกลยุทธ์ของคุณเอง ฟรี ไม่ต้องสมัคร">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="https://pond1982.github.io/prisoners-dilemma/">
+<link rel="alternate" hreflang="th" href="https://pond1982.github.io/prisoners-dilemma/">
+<link rel="alternate" hreflang="en" href="https://pond1982.github.io/prisoners-dilemma/en/">
+<link rel="alternate" hreflang="x-default" href="https://pond1982.github.io/prisoners-dilemma/en/">
+<meta name="author" content="Suwitcha “Pondd” Sugthana">
+<link rel="author" href="https://pond1982.github.io/Pondd-Page/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ร่วมมือหรือหักหลัง">
+<meta property="og:title" content="เป็นคนดี คุ้มไหม? ลองเล่น Prisoner's Dilemma แล้วดูกลยุทธ์ดวลกันนับพันแมตช์">
+<meta property="og:description" content="เลือกร่วมมือหรือหักหลัง แล้วดูว่าทำไมกลยุทธ์ที่ใจดีแต่ไม่ยอมโดนเอาเปรียบถึงชนะการแข่งขันของแอ็กเซลรอด ทฤษฎีเกมฉบับเล่นได้ ฟรีบนเบราว์เซอร์">
+<meta property="og:url" content="https://pond1982.github.io/prisoners-dilemma/">
+<meta property="og:locale" content="th_TH">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:image" content="https://pond1982.github.io/prisoners-dilemma/og-th.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ร่วมมือหรือหักหลัง เกมความลำบากใจของนักโทษ (Prisoner's Dilemma) แบบเล่นได้">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image:alt" content="ร่วมมือหรือหักหลัง เกมความลำบากใจของนักโทษ (Prisoner's Dilemma) แบบเล่นได้">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F5F4FA" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#110F18" media="(prefers-color-scheme: dark)">
-<title>ร่วมมือหรือหักหลัง · ความลำบากใจของนักโทษ</title>
-<meta name="description" content="เรียนรู้ความลำบากใจของนักโทษทีละขั้น ลองเล่นเอง ดูกลยุทธ์คลาสสิกดวลกัน จัดทัวร์นาเมนต์แบบแอ็กเซลรอด จำลองวิวัฒนาการ และสร้างกลยุทธ์ของคุณเอง">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&family=Mitr:wght@400;500;600&display=swap">
@@ -643,16 +666,6 @@ textarea.text-input { font-size: 14px; font-weight: 500; resize: vertical; word-
   *, *::before, *::after { animation-duration: .001ms !important; animation-delay: 0ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
 }
 </style>
-<meta property="og:type" content="website">
-<meta property="og:title" content="ร่วมมือหรือหักหลัง · ความลำบากใจของนักโทษ">
-<meta property="og:description" content="เรียนรู้ความลำบากใจของนักโทษทีละขั้น ลองเล่นเอง ดูกลยุทธ์คลาสสิกดวลกัน จัดทัวร์นาเมนต์แบบแอ็กเซลรอด จำลองวิวัฒนาการ และสร้างกลยุทธ์ของคุณเอง">
-<meta property="og:locale" content="th_TH">
-<meta name="twitter:card" content="summary">
-<meta name="author" content="Suwitcha “Pondd” Sugthana">
-<link rel="author" href="https://pond1982.github.io/Pondd-Page/">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="alternate" hreflang="en" href="en/">
 <style>
 :root { padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
 img { max-width: 100%; }
@@ -671,7 +684,191 @@ img { max-width: 100%; }
 .credit a { color: var(--ink); font-weight: 600; white-space: nowrap; text-decoration: underline; text-decoration-color: var(--line-strong); text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
 .credit a:hover { text-decoration-color: currentColor; }
 .credit svg { width: 11px; height: 11px; margin-left: 5px; }
+.faq { margin-top: 112px; scroll-margin-top: 96px; }
+.faq-head { max-width: 720px; margin-bottom: 28px; }
+.faq-head .lede { margin-top: 10px; }
+.faq-list { display: grid; gap: 12px; max-width: 900px; }
+.faq-item { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow-1, none); transition: border-color .15s; }
+.faq-item:hover { border-color: var(--line-strong); }
+.faq-item > summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px 18px 24px; border-radius: 20px; cursor: pointer; }
+.faq-item > summary::-webkit-details-marker { display: none; }
+.faq-q { margin: 0; }
+.faq-toggle { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); transition: transform .2s ease; }
+.faq-toggle svg { width: 14px; height: 14px; }
+.faq-item[open] .faq-toggle { transform: rotate(180deg); }
+.faq-a { max-width: 74ch; padding: 0 24px 22px; color: var(--ink-2); }
+.faq-a p + p { margin-top: 10px; }
+@media (max-width: 600px) { .faq { margin-top: 72px; } .faq-item > summary { padding: 15px 14px 15px 18px; } .faq-a { padding: 0 18px 18px; } }
+@media (prefers-reduced-motion: reduce) { .faq-toggle { transition: none; } }
 </style>
+<style>
+.h1-kicker { display: block; width: fit-content; max-width: 100%; margin: 0 0 16px; padding: 4px 14px; border-radius: 999px; font-family: var(--font); font-size: 16px; font-weight: 600; line-height: 1.6; letter-spacing: 0; color: var(--coop-soft); background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .16); }
+@media (max-width: 420px) { .h1-kicker { font-size: 14px; padding: 3px 12px; margin-bottom: 12px; } }
+</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "WebSite",
+   "@id": "https://pond1982.github.io/prisoners-dilemma/#website",
+   "url": "https://pond1982.github.io/prisoners-dilemma/",
+   "name": "ร่วมมือหรือหักหลัง",
+   "alternateName": [
+    "Prisoner's Dilemma Arena",
+    "Dilemma Arena",
+    "ความลำบากใจของนักโทษ"
+   ],
+   "inLanguage": [
+    "th",
+    "en"
+   ],
+   "creator": {
+    "@id": "https://pond1982.github.io/Pondd-Page/#person"
+   }
+  },
+  {
+   "@type": [
+    "WebApplication",
+    "LearningResource"
+   ],
+   "@id": "https://pond1982.github.io/prisoners-dilemma/#app",
+   "url": "https://pond1982.github.io/prisoners-dilemma/",
+   "name": "ร่วมมือหรือหักหลัง · ความลำบากใจของนักโทษ (Prisoner's Dilemma)",
+   "description": "เข้าใจความลำบากใจของนักโทษ (Prisoner's Dilemma) ทีละขั้นแบบเล่นได้จริง ดูกลยุทธ์อย่างตาต่อตา (Tit for Tat) ดวลกัน จัดทัวร์นาเมนต์แบบแอ็กเซลรอด จำลองวิวัฒนาการ และสร้างกลยุทธ์ของคุณเอง ฟรี ไม่ต้องสมัคร",
+   "inLanguage": "th",
+   "image": "https://pond1982.github.io/prisoners-dilemma/og-th.png",
+   "isPartOf": {
+    "@id": "https://pond1982.github.io/prisoners-dilemma/#website"
+   },
+   "applicationCategory": "EducationalApplication",
+   "operatingSystem": "Any",
+   "browserRequirements": "Requires JavaScript",
+   "isAccessibleForFree": true,
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+   },
+   "learningResourceType": "Interactive simulation",
+   "educationalLevel": "Beginner",
+   "teaches": [
+    "ความลำบากใจของนักโทษ (Prisoner's Dilemma)",
+    "ทฤษฎีเกม",
+    "กลยุทธ์ตาต่อตา (Tit for Tat)",
+    "การแข่งขันของแอ็กเซลรอด",
+    "วิวัฒนาการของความร่วมมือ"
+   ],
+   "about": [
+    {
+     "@type": "Thing",
+     "name": "Prisoner's dilemma",
+     "sameAs": [
+      "https://en.wikipedia.org/wiki/Prisoner%27s_dilemma",
+      "https://th.wikipedia.org/wiki/%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%A5%E0%B8%B3%E0%B8%9A%E0%B8%B2%E0%B8%81%E0%B9%83%E0%B8%88%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B9%82%E0%B8%97%E0%B8%A9"
+     ]
+    },
+    {
+     "@type": "Thing",
+     "name": "Game theory",
+     "sameAs": "https://en.wikipedia.org/wiki/Game_theory"
+    },
+    {
+     "@type": "Thing",
+     "name": "Tit for tat",
+     "sameAs": "https://en.wikipedia.org/wiki/Tit_for_tat"
+    },
+    {
+     "@type": "Thing",
+     "name": "The Evolution of Cooperation",
+     "sameAs": "https://en.wikipedia.org/wiki/The_Evolution_of_Cooperation"
+    }
+   ],
+   "author": {
+    "@id": "https://pond1982.github.io/Pondd-Page/#person"
+   },
+   "creator": {
+    "@id": "https://pond1982.github.io/Pondd-Page/#person"
+   },
+   "datePublished": "2026-09-27",
+   "dateModified": "2026-09-27"
+  },
+  {
+   "@type": "Person",
+   "@id": "https://pond1982.github.io/Pondd-Page/#person",
+   "name": "Suwitcha Sugthana",
+   "alternateName": "Pondd",
+   "url": "https://pond1982.github.io/Pondd-Page/",
+   "sameAs": [
+    "https://github.com/pond1982"
+   ]
+  },
+  {
+   "@type": "FAQPage",
+   "@id": "https://pond1982.github.io/prisoners-dilemma/#faq",
+   "inLanguage": "th",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "ความลำบากใจของนักโทษ (Prisoner’s Dilemma) คืออะไร",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "ความลำบากใจของนักโทษ หรือ Prisoner’s Dilemma เป็นเกมพื้นฐานของทฤษฎีเกม (Game Theory) ผู้เล่นสองคนต้องเลือกพร้อมกันว่าจะร่วมมือหรือหักหลัง โดยไม่รู้ว่าอีกฝ่ายเลือกอะไร ถ้าร่วมมือกันทั้งคู่ได้คนละ 3 คะแนน ถ้าหักหลังทั้งคู่ได้คนละ 1 คะแนน ถ้าฝ่ายหนึ่งหักหลังขณะที่อีกฝ่ายร่วมมือ คนหักหลังได้ 5 คะแนน ส่วนคนที่ร่วมมือได้ 0 ที่เรียกว่าลำบากใจ เพราะในรอบเดียว การหักหลังได้คะแนนมากกว่าเสมอ แต่ถ้าทั้งสองคนคิดแบบนั้น ทั้งคู่จะได้น้อยกว่าตอนร่วมมือกัน เมอร์ริล ฟลัด และเมลวิน เดรเชอร์ คิดเกมนี้ขึ้นที่ RAND ในปี 1950 แล้วอัลเบิร์ต ทักเกอร์ เล่าเป็นเรื่องนักโทษและตั้งชื่อให้ บางตำราเรียกว่า ภาวะกลืนไม่เข้าคายไม่ออกของนักโทษ"
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "ทำไมการหักหลังถึงดูคุ้มกว่า ทั้งที่ร่วมมือกันได้มากกว่า",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "ลองมองจากฝั่งคุณ ถ้าอีกฝ่ายร่วมมือ การหักหลังได้ 5 แทน 3 ถ้าอีกฝ่ายหักหลัง การหักหลังได้ 1 แทน 0 ไม่ว่าเขาจะเลือกอะไร การหักหลังก็ได้มากกว่า อีกฝ่ายก็คิดแบบเดียวกัน ผลคือต่างคนต่างหักหลังและได้คนละ 1 คะแนน จุดนี้เรียกว่า ดุลยภาพของแนช (Nash equilibrium) คือจุดที่ไม่มีใครได้ประโยชน์จากการเปลี่ยนใจอยู่คนเดียว ทั้งที่ถ้าร่วมมือกันจะได้คนละ 3 คะแนน"
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "การแข่งขันของแอ็กเซลรอดคืออะไร ใครเป็นผู้ชนะ",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "ปี 1980 โรเบิร์ต แอ็กเซลรอด นักรัฐศาสตร์แห่งมหาวิทยาลัยมิชิแกน เชิญผู้เชี่ยวชาญด้านทฤษฎีเกมส่งโปรแกรมคอมพิวเตอร์มาเล่นเกมนี้ซ้ำหลายรอบแบบพบกันหมด มีโปรแกรมส่งเข้ามา 14 ตัว บวกโปรแกรมที่เลือกแบบสุ่มอีกหนึ่งตัว แต่ละคู่แข่งกัน 200 รอบ ผู้ชนะคือโปรแกรมที่ง่ายที่สุด คือ ตาต่อตา (Tit for Tat) ของอนาทอล แรพพอพอร์ต ในการแข่งขันครั้งที่สองมีผู้ส่ง 62 โปรแกรม หลายตัวเขียนมาเพื่อล้มตาต่อตาโดยเฉพาะ แต่ตาต่อตาก็ชนะอีก"
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "ตาต่อตา (Tit for Tat) ทำงานอย่างไร ทำไมถึงชนะ",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "กฎมีแค่สองข้อ รอบแรกร่วมมือ จากนั้นทำตามที่อีกฝ่ายทำในรอบก่อน แอ็กเซลรอดพบว่ากลยุทธ์ที่ทำคะแนนได้ดีมีนิสัยร่วมกันสี่อย่าง คือ ใจดี (ไม่เป็นฝ่ายหักหลังก่อน) ตอบโต้ (ถูกหักหลังแล้วเอาคืนทันที) ให้อภัย (กลับมาร่วมมือทันทีที่อีกฝ่ายร่วมมือ) และชัดเจน (คาดเดาง่าย อีกฝ่ายจึงเรียนรู้เร็วว่าร่วมมือด้วยคุ้มที่สุด) ตาต่อตาไม่เคยชนะใครแบบตัวต่อตัวเลย แต่ได้คะแนนรวมสูงสุดเพราะชวนให้ทุกคนร่วมมือด้วย"
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "ความร่วมมือเกิดขึ้นได้อย่างไร ในเมื่อแต่ละคนต่างเห็นแก่ตัว",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "เพราะเราต้องเจอกันอีก เมื่อเล่นกับคู่เดิมหลายรอบ การหักหลังวันนี้อาจทำให้เสียความร่วมมือไปอีกหลายรอบ แอ็กเซลรอดเรียกสิ่งนี้ว่า เงาของอนาคต (the shadow of the future) เมื่อจำลองวิวัฒนาการ โดยให้กลยุทธ์ที่ได้คะแนนดีมีลูกหลานในรุ่นถัดไปมากขึ้น กลยุทธ์ที่ร่วมมือเป็นแต่ไม่ยอมให้ใครเอาเปรียบจะค่อย ๆ ขยายจนครองประชากร"
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "ในชีวิตจริงมีตัวอย่างอะไรบ้าง",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "สงครามราคาระหว่างร้านค้า การแข่งกันสะสมอาวุธ การจับปลาจนหมดทะเล ข้อตกลงลดโลกร้อนที่ทุกประเทศอยากให้ประเทศอื่นลดก่อน และงานกลุ่มที่ทุกคนหวังให้คนอื่นทำ ในสงครามโลกครั้งที่หนึ่ง ทหารในสนามเพลาะที่ต้องเผชิญหน้ากันทุกวัน เคยผ่อนการยิงใส่กันเองโดยไม่มีใครสั่ง เรียกกันว่าระบบ “live and let live” แอ็กเซลรอดเล่าเรื่องนี้ไว้ในหนังสือ The Evolution of Cooperation (1984)"
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "สร้างกลยุทธ์ของตัวเองแล้วส่งลงแข่งได้ไหม",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "ได้ กดปุ่ม “สร้างกลยุทธ์” กำหนดตาเปิดเกม และกฎว่าหลังจากนั้นในแต่ละรอบจะเลือกอะไร แล้วส่งลงดวลตัวต่อตัว ทัวร์นาเมนต์ หรือวิวัฒนาการได้ทันที กลยุทธ์จะถูกบันทึกไว้ในเบราว์เซอร์ของคุณ และแชร์ให้เพื่อนได้ด้วยโค้ดแชร์ ซึ่งใช้ได้ทั้งเว็บภาษาไทยและภาษาอังกฤษ ทุกอย่างทำงานบนเบราว์เซอร์ ฟรี ไม่ต้องสมัครสมาชิก"
+     }
+    }
+   ]
+  }
+ ]
+}
+</script>
 </head>
 <body>
 <a class="skip" href="#main">ข้ามไปที่เนื้อหา</a>
@@ -713,7 +910,7 @@ img { max-width: 100%; }
       <div class="wrap">
         <div class="hero-mosaic" id="hero-mosaic" aria-hidden="true"></div>
         <div class="hero-head">
-          <h1 class="display">เป็นคนดี คุ้มไหม?</h1>
+          <h1 class="display"><span class="h1-kicker">ความลำบากใจของนักโทษ · Prisoner’s Dilemma<span class="sr-only">: </span></span>เป็นคนดี คุ้มไหม?</h1>
           <p class="lede">ทุกรอบ คุณกับโปรแกรมลึกลับจะเลือกพร้อมกันว่าจะ “ร่วมมือ” หรือ “หักหลัง” โดยไม่รู้ว่าอีกฝ่ายเลือกอะไร เล่นให้ครบ 10 รอบ แล้วดูว่าใครได้คะแนนมากกว่ากัน</p>
           <p class="hero-help">ยังงงกับกติกาอยู่ใช่ไหม ไม่เป็นไร <button class="link-btn" type="button" data-action="to-learn">อ่านคำอธิบายทีละขั้นด้านล่าง</button></p>
         </div>
@@ -1058,6 +1255,42 @@ img { max-width: 100%; }
               <li><div class="ex-top"><span class="ex-icon" data-ex="build"></span><span class="step-num" aria-hidden="true">5</span></div><h4 class="h3">สร้างกลยุทธ์ของคุณเอง</h4><p>เขียนกฎของคุณเอง แล้วส่งลงแข่งกับกลยุทธ์คลาสสิก</p><button class="btn btn-sm btn-primary" type="button" data-action="new-strategy">สร้างกลยุทธ์</button></li>
             </ol>
           </section>
+        </div>
+      </section>
+      <section class="faq" id="faq" aria-labelledby="faq-title">
+        <div class="faq-head">
+          <h2 class="title" id="faq-title">คำถามที่พบบ่อย</h2>
+          <p class="lede">คำตอบสั้น ๆ สำหรับคนที่อยากได้ภาพรวมเร็ว ๆ</p>
+        </div>
+        <div class="faq-list">
+          <details class="faq-item" open>
+            <summary><h3 class="h3 faq-q">ความลำบากใจของนักโทษ (Prisoner’s Dilemma) คืออะไร</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>ความลำบากใจของนักโทษ หรือ Prisoner’s Dilemma เป็นเกมพื้นฐานของทฤษฎีเกม (Game Theory) ผู้เล่นสองคนต้องเลือกพร้อมกันว่าจะร่วมมือหรือหักหลัง โดยไม่รู้ว่าอีกฝ่ายเลือกอะไร ถ้าร่วมมือกันทั้งคู่ได้คนละ 3 คะแนน ถ้าหักหลังทั้งคู่ได้คนละ 1 คะแนน ถ้าฝ่ายหนึ่งหักหลังขณะที่อีกฝ่ายร่วมมือ คนหักหลังได้ 5 คะแนน ส่วนคนที่ร่วมมือได้ 0</p><p>ที่เรียกว่าลำบากใจ เพราะในรอบเดียว การหักหลังได้คะแนนมากกว่าเสมอ แต่ถ้าทั้งสองคนคิดแบบนั้น ทั้งคู่จะได้น้อยกว่าตอนร่วมมือกัน เมอร์ริล ฟลัด และเมลวิน เดรเชอร์ คิดเกมนี้ขึ้นที่ RAND ในปี 1950 แล้วอัลเบิร์ต ทักเกอร์ เล่าเป็นเรื่องนักโทษและตั้งชื่อให้ บางตำราเรียกว่า ภาวะกลืนไม่เข้าคายไม่ออกของนักโทษ</p></div>
+          </details>
+          <details class="faq-item">
+            <summary><h3 class="h3 faq-q">ทำไมการหักหลังถึงดูคุ้มกว่า ทั้งที่ร่วมมือกันได้มากกว่า</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>ลองมองจากฝั่งคุณ ถ้าอีกฝ่ายร่วมมือ การหักหลังได้ 5 แทน 3 ถ้าอีกฝ่ายหักหลัง การหักหลังได้ 1 แทน 0 ไม่ว่าเขาจะเลือกอะไร การหักหลังก็ได้มากกว่า อีกฝ่ายก็คิดแบบเดียวกัน ผลคือต่างคนต่างหักหลังและได้คนละ 1 คะแนน</p><p>จุดนี้เรียกว่า ดุลยภาพของแนช (Nash equilibrium) คือจุดที่ไม่มีใครได้ประโยชน์จากการเปลี่ยนใจอยู่คนเดียว ทั้งที่ถ้าร่วมมือกันจะได้คนละ 3 คะแนน</p></div>
+          </details>
+          <details class="faq-item">
+            <summary><h3 class="h3 faq-q">การแข่งขันของแอ็กเซลรอดคืออะไร ใครเป็นผู้ชนะ</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>ปี 1980 โรเบิร์ต แอ็กเซลรอด นักรัฐศาสตร์แห่งมหาวิทยาลัยมิชิแกน เชิญผู้เชี่ยวชาญด้านทฤษฎีเกมส่งโปรแกรมคอมพิวเตอร์มาเล่นเกมนี้ซ้ำหลายรอบแบบพบกันหมด มีโปรแกรมส่งเข้ามา 14 ตัว บวกโปรแกรมที่เลือกแบบสุ่มอีกหนึ่งตัว แต่ละคู่แข่งกัน 200 รอบ</p><p>ผู้ชนะคือโปรแกรมที่ง่ายที่สุด คือ ตาต่อตา (Tit for Tat) ของอนาทอล แรพพอพอร์ต ในการแข่งขันครั้งที่สองมีผู้ส่ง 62 โปรแกรม หลายตัวเขียนมาเพื่อล้มตาต่อตาโดยเฉพาะ แต่ตาต่อตาก็ชนะอีก</p></div>
+          </details>
+          <details class="faq-item">
+            <summary><h3 class="h3 faq-q">ตาต่อตา (Tit for Tat) ทำงานอย่างไร ทำไมถึงชนะ</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>กฎมีแค่สองข้อ รอบแรกร่วมมือ จากนั้นทำตามที่อีกฝ่ายทำในรอบก่อน</p><p>แอ็กเซลรอดพบว่ากลยุทธ์ที่ทำคะแนนได้ดีมีนิสัยร่วมกันสี่อย่าง คือ ใจดี (ไม่เป็นฝ่ายหักหลังก่อน) ตอบโต้ (ถูกหักหลังแล้วเอาคืนทันที) ให้อภัย (กลับมาร่วมมือทันทีที่อีกฝ่ายร่วมมือ) และชัดเจน (คาดเดาง่าย อีกฝ่ายจึงเรียนรู้เร็วว่าร่วมมือด้วยคุ้มที่สุด) ตาต่อตาไม่เคยชนะใครแบบตัวต่อตัวเลย แต่ได้คะแนนรวมสูงสุดเพราะชวนให้ทุกคนร่วมมือด้วย</p></div>
+          </details>
+          <details class="faq-item">
+            <summary><h3 class="h3 faq-q">ความร่วมมือเกิดขึ้นได้อย่างไร ในเมื่อแต่ละคนต่างเห็นแก่ตัว</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>เพราะเราต้องเจอกันอีก เมื่อเล่นกับคู่เดิมหลายรอบ การหักหลังวันนี้อาจทำให้เสียความร่วมมือไปอีกหลายรอบ แอ็กเซลรอดเรียกสิ่งนี้ว่า เงาของอนาคต (the shadow of the future)</p><p>เมื่อจำลองวิวัฒนาการ โดยให้กลยุทธ์ที่ได้คะแนนดีมีลูกหลานในรุ่นถัดไปมากขึ้น กลยุทธ์ที่ร่วมมือเป็นแต่ไม่ยอมให้ใครเอาเปรียบจะค่อย ๆ ขยายจนครองประชากร</p></div>
+          </details>
+          <details class="faq-item">
+            <summary><h3 class="h3 faq-q">ในชีวิตจริงมีตัวอย่างอะไรบ้าง</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>สงครามราคาระหว่างร้านค้า การแข่งกันสะสมอาวุธ การจับปลาจนหมดทะเล ข้อตกลงลดโลกร้อนที่ทุกประเทศอยากให้ประเทศอื่นลดก่อน และงานกลุ่มที่ทุกคนหวังให้คนอื่นทำ</p><p>ในสงครามโลกครั้งที่หนึ่ง ทหารในสนามเพลาะที่ต้องเผชิญหน้ากันทุกวัน เคยผ่อนการยิงใส่กันเองโดยไม่มีใครสั่ง เรียกกันว่าระบบ “live and let live” แอ็กเซลรอดเล่าเรื่องนี้ไว้ในหนังสือ The Evolution of Cooperation (1984)</p></div>
+          </details>
+          <details class="faq-item">
+            <summary><h3 class="h3 faq-q">สร้างกลยุทธ์ของตัวเองแล้วส่งลงแข่งได้ไหม</h3><span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+            <div class="faq-a"><p>ได้ กดปุ่ม “สร้างกลยุทธ์” กำหนดตาเปิดเกม และกฎว่าหลังจากนั้นในแต่ละรอบจะเลือกอะไร แล้วส่งลงดวลตัวต่อตัว ทัวร์นาเมนต์ หรือวิวัฒนาการได้ทันที</p><p>กลยุทธ์จะถูกบันทึกไว้ในเบราว์เซอร์ของคุณ และแชร์ให้เพื่อนได้ด้วยโค้ดแชร์ ซึ่งใช้ได้ทั้งเว็บภาษาไทยและภาษาอังกฤษ ทุกอย่างทำงานบนเบราว์เซอร์ ฟรี ไม่ต้องสมัครสมาชิก</p></div>
+          </details>
         </div>
       </section>
     </div>

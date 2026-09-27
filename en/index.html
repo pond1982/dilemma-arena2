@@ -1,0 +1,2787 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F3F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#110F18" media="(prefers-color-scheme: dark)">
+<title>Prisoner's Dilemma Arena</title>
+<meta name="description" content="Play the repeated prisoner's dilemma, watch classic strategies face off, run Axelrod-style tournaments and evolution, and build your own strategy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Recursive:slnt,wght,CASL,CRSV,MONO@-15..0,300..1000,0..1,0..1,0..1&display=swap">
+<style>
+/* ---------- tokens ---------- */
+:root {
+  --paper: #F3F2F7;
+  --surface: #FFFFFF;
+  --surface-2: #F7F6FA;
+  --ink: #1B1830;
+  --ink-2: #4E4A66;
+  --ink-3: #6E6A86;
+  --line: #E4E2EC;
+  --line-strong: #CCC9D9;
+  --coop: #EDA100;
+  --coop-wash: #FCEFD0;
+  --defect: #4A3AA7;
+  --defect-wash: #E8E5F7;
+  --on-coop: #1B1830;
+  --on-defect: #FFFFFF;
+  --empty: #E7E5EF;
+  --seq-lo: #F0EFF6;
+  --seq-hi: #25213F;
+  --seq-text-hi: #FFFFFF;
+  --err: #B3261E;
+  --scrim: rgba(27, 24, 48, 0.42);
+  --shadow-float: 0 2px 6px rgba(27, 24, 48, .08), 0 18px 48px rgba(27, 24, 48, .18);
+  --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%236E6A86' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --tint-to: #FFFFFF;
+  --font: "Recursive", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121019;
+    --surface: #1B1925;
+    --surface-2: #221F2D;
+    --ink: #F1EFF8;
+    --ink-2: #BEBAD0;
+    --ink-3: #9793AD;
+    --line: #2E2B3C;
+    --line-strong: #433F57;
+    --coop: #C98500;
+    --coop-wash: #372A0B;
+    --defect: #9085E9;
+    --defect-wash: #2A2550;
+    --on-coop: #17141F;
+    --on-defect: #17141F;
+    --empty: #2B2839;
+    --seq-lo: #221F2E;
+    --seq-hi: #EAE7F7;
+    --seq-text-hi: #17141F;
+    --tint-to: #F1EFF8;
+    --err: #FF8A80;
+    --scrim: rgba(0, 0, 0, 0.58);
+    --shadow-float: 0 2px 6px rgba(0, 0, 0, .4), 0 18px 48px rgba(0, 0, 0, .55);
+    --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%239793AD' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121019;
+  --surface: #1B1925;
+  --surface-2: #221F2D;
+  --ink: #F1EFF8;
+  --ink-2: #BEBAD0;
+  --ink-3: #9793AD;
+  --line: #2E2B3C;
+  --line-strong: #433F57;
+  --coop: #C98500;
+  --coop-wash: #372A0B;
+  --defect: #9085E9;
+  --defect-wash: #2A2550;
+  --on-coop: #17141F;
+  --on-defect: #17141F;
+  --empty: #2B2839;
+  --seq-lo: #221F2E;
+  --seq-hi: #EAE7F7;
+  --seq-text-hi: #17141F;
+  --tint-to: #F1EFF8;
+  --err: #FF8A80;
+  --scrim: rgba(0, 0, 0, 0.58);
+  --shadow-float: 0 2px 6px rgba(0, 0, 0, .4), 0 18px 48px rgba(0, 0, 0, .55);
+  --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%239793AD' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  color-scheme: dark;
+}
+
+/* ---------- base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.55;
+  font-weight: 400;
+  font-variation-settings: "CASL" 0, "MONO" 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+p { margin: 0; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.skip { position: absolute; left: 16px; top: -60px; z-index: 100; background: var(--ink); color: var(--surface); padding: 8px 14px; border-radius: 999px; font-weight: 650; text-decoration: none; }
+.skip:focus { top: 10px; }
+.wrap { max-width: 1180px; margin-inline: auto; padding-inline: 24px; }
+@media (max-width: 600px) { .wrap { padding-inline: 16px; } }
+
+/* ---------- top bar ---------- */
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30;
+  background: color-mix(in oklab, var(--paper) 86%, transparent);
+  -webkit-backdrop-filter: blur(12px) saturate(1.3);
+  backdrop-filter: blur(12px) saturate(1.3);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-inner { display: flex; align-items: center; gap: 12px 22px; min-height: 64px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-weight: 820; font-size: 18px; letter-spacing: -0.025em; white-space: nowrap; font-variation-settings: "CASL" 0.5, "MONO" 0; }
+.brand-mark { width: 38px; height: 18px; flex: none; }
+.tabs { display: flex; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; padding: 2px; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: none; appearance: none; border: 0; background: transparent; color: var(--ink-2); font-size: 15px; font-weight: 620; padding: 7px 14px; border-radius: 999px; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
+.tab:hover { color: var(--ink); background: color-mix(in oklab, var(--ink) 6%, transparent); }
+.tab[aria-selected="true"] { color: var(--ink); background: var(--surface); box-shadow: 0 0 0 1px var(--line-strong); }
+.btn-build .short { display: none; }
+@media (max-width: 900px) {
+  .topbar-inner { flex-wrap: wrap; padding-top: 10px; min-height: 0; }
+  .brand { flex: 1; }
+  .tabs { order: 3; flex-basis: 100%; padding-bottom: 8px; }
+}
+@media (max-width: 420px) {
+  .btn-build .long { display: none; }
+  .btn-build .short { display: inline; }
+}
+
+/* ---------- buttons & controls ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; appearance: none; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); font-size: 15px; font-weight: 650; line-height: 1.2; padding: 9px 16px; border-radius: 999px; cursor: pointer; text-decoration: none; white-space: nowrap; transition: background .15s, border-color .15s, transform .1s; }
+.btn:hover { border-color: var(--ink-3); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .45; cursor: default; transform: none; border-color: var(--line-strong); }
+.btn-primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.btn-primary:hover { background: color-mix(in oklab, var(--ink) 84%, var(--surface)); border-color: color-mix(in oklab, var(--ink) 84%, var(--surface)); }
+.btn-sm { font-size: 14px; padding: 6px 12px; }
+.btn-lg { font-size: 16px; padding: 12px 22px; }
+.btn svg, .icon-btn svg { width: 16px; height: 16px; flex: none; }
+.btn-danger { color: var(--err); }
+.icon-btn { display: inline-grid; place-items: center; width: 34px; height: 34px; flex: none; appearance: none; border: 0; border-radius: 999px; background: transparent; color: var(--ink-2); cursor: pointer; }
+.icon-btn:hover { background: color-mix(in oklab, var(--ink) 8%, transparent); color: var(--ink); }
+.icon-btn:disabled { opacity: .3; cursor: default; background: transparent; }
+.link-btn { appearance: none; border: 0; background: none; padding: 0; color: var(--ink); font-weight: 650; font-size: inherit; text-decoration: underline; text-decoration-color: var(--line-strong); text-decoration-thickness: 1.5px; text-underline-offset: 3px; cursor: pointer; }
+.link-btn:hover { text-decoration-color: var(--ink); }
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn-row.end { justify-content: flex-end; }
+
+.field { display: grid; gap: 6px; min-width: 0; }
+.field-label { font-size: 13px; font-weight: 650; color: var(--ink-2); display: flex; justify-content: space-between; gap: 10px; }
+.field-label output { color: var(--ink); font-weight: 750; }
+.select { appearance: none; -webkit-appearance: none; background: var(--surface) var(--chev) no-repeat right 12px center / 12px 12px; border: 1px solid var(--line-strong); border-radius: 12px; padding: 9px 34px 9px 12px; font-size: 15px; font-weight: 620; color: var(--ink); min-width: 0; max-width: 100%; cursor: pointer; }
+.select:hover { border-color: var(--ink-3); }
+.select-sm { font-size: 14px; padding: 6px 30px 6px 10px; border-radius: 10px; background-position: right 10px center; }
+.range { accent-color: var(--ink); width: 150px; max-width: 100%; margin: 7px 0; }
+.num { width: 64px; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--surface); font-size: 14px; font-weight: 650; }
+.text-input { width: 100%; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--surface); font-size: 16px; font-weight: 620; }
+textarea.text-input { font-size: 14px; font-weight: 500; resize: vertical; font-variation-settings: "MONO" 1, "CASL" 0; word-break: break-all; }
+.check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 620; color: var(--ink-2); cursor: pointer; padding-bottom: 8px; }
+.check input { accent-color: var(--ink); width: 16px; height: 16px; margin: 0; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 18px; background: var(--surface-2); border: 1px solid var(--line); max-width: 100%; }
+.seg button { appearance: none; border: 0; background: transparent; padding: 5px 12px; border-radius: 999px; font-size: 14px; font-weight: 650; color: var(--ink-2); cursor: pointer; white-space: nowrap; }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--line-strong), 0 1px 2px rgba(0, 0, 0, .06); }
+
+/* ---------- layout pieces ---------- */
+.view { padding-block: 44px 96px; }
+.view-head { display: grid; gap: 12px; margin-bottom: 28px; }
+.view-head-row { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px; }
+.view-head-row > div:first-child { display: grid; gap: 12px; }
+.display { font-size: clamp(40px, 6.4vw, 72px); line-height: 1; letter-spacing: -0.045em; font-weight: 860; margin: 0; text-wrap: balance; max-width: 15ch; font-variation-settings: "CASL" 0.3, "MONO" 0; }
+.title { font-size: clamp(32px, 4.2vw, 46px); line-height: 1.05; letter-spacing: -0.035em; font-weight: 830; margin: 0; text-wrap: balance; font-variation-settings: "CASL" 0.3, "MONO" 0; }
+.h2 { font-size: clamp(26px, 3vw, 32px); line-height: 1.12; letter-spacing: -0.028em; font-weight: 800; margin: 0; text-wrap: balance; font-variation-settings: "CASL" 0.3, "MONO" 0; }
+.h3 { font-size: 19px; line-height: 1.3; letter-spacing: -0.012em; font-weight: 760; margin: 0; }
+.lede { font-size: 18px; line-height: 1.55; color: var(--ink-2); max-width: 64ch; }
+.fine { font-size: 13px; line-height: 1.5; color: var(--ink-3); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 24px; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin-bottom: 16px; }
+@media (max-width: 600px) { .panel { padding: 18px; border-radius: 16px; } .view { padding-block: 28px 72px; } }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 7px; flex: none; }
+.sw-c { background: var(--coop); } .sw-d { background: var(--defect); }
+.key-line { display: inline-block; width: 16px; height: 2px; border-radius: 2px; margin-right: 7px; flex: none; }
+
+/* ---------- the game ---------- */
+.hero-head { display: grid; gap: 18px; margin-bottom: 30px; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 920px) { .hero-grid { grid-template-columns: minmax(0, 1fr); } }
+.duel { display: grid; gap: 20px; }
+.duel-status { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 16px; font-size: 15px; color: var(--ink-2); font-weight: 620; }
+.duel-score { display: flex; gap: 20px; }
+.duel-score b { font-size: 24px; color: var(--ink); font-weight: 850; margin-left: 6px; letter-spacing: -0.02em; font-feature-settings: "pnum"; }
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.choice {
+  appearance: none; border: 0; cursor: pointer;
+  font-weight: 870; font-size: clamp(24px, 5.6vw, 64px); letter-spacing: -0.04em; line-height: 1;
+  padding: .5em .25em .42em; border-radius: 22px;
+  display: flex; flex-direction: column; align-items: center; gap: .3em;
+  font-variation-settings: "CASL" 0.3, "MONO" 0;
+  transition: transform .12s ease, box-shadow .12s ease, opacity .2s;
+}
+.choice small { font-size: 13px; font-weight: 650; letter-spacing: 0; opacity: .72; font-variation-settings: "CASL" 0, "MONO" 0; }
+.choice-c { background: var(--coop); color: var(--on-coop); }
+.choice-d { background: var(--defect); color: var(--on-defect); }
+.choice:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 24px color-mix(in oklab, var(--ink) 18%, transparent); }
+.choice:active:not(:disabled) { transform: translateY(0) scale(.985); }
+.choice:disabled { opacity: .35; cursor: default; }
+@media (hover: none) { .choice small { display: none; } }
+.duel-board { display: grid; gap: 6px; }
+.duel-row { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 10px; }
+.duel-who { font-size: 13px; font-weight: 650; color: var(--ink-3); }
+.duel-cells { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; }
+.dcell { aspect-ratio: 1; max-width: 100%; border-radius: 7px; background: var(--empty); display: grid; place-items: center; font-size: clamp(11px, 1.5vw, 15px); font-weight: 850; }
+.dcell.c { background: var(--coop); color: var(--on-coop); }
+.dcell.d { background: var(--defect); color: var(--on-defect); }
+.dcell.next { background: transparent; box-shadow: inset 0 0 0 2px var(--line-strong); }
+.dcell.pop { animation: pop .3s cubic-bezier(.2, .9, .3, 1.35); }
+@keyframes pop { from { transform: scale(.55); } to { transform: scale(1); } }
+.duel-msg { min-height: 1.55em; font-size: 16px; }
+.duel-end { display: grid; gap: 12px; padding-top: 18px; border-top: 1px solid var(--line); }
+.duel-verdict { font-size: 24px; font-weight: 830; letter-spacing: -0.025em; line-height: 1.2; font-variation-settings: "CASL" 0.3, "MONO" 0; }
+.duel-reveal { color: var(--ink-2); max-width: 60ch; }
+.duel-reveal b { color: var(--ink); }
+
+.pay { display: grid; gap: 14px; }
+.paytable { width: calc(100% + 12px); margin: -6px; border-collapse: separate; border-spacing: 6px; table-layout: fixed; }
+.paytable th { font-size: 13px; font-weight: 650; color: var(--ink-2); text-align: left; padding: 0 2px; line-height: 1.25; }
+.paytable thead th { vertical-align: bottom; padding-bottom: 2px; }
+.paytable th .sw { vertical-align: -1px; }
+.paytable .corner { width: 26%; }
+.pt-cell { background: var(--surface-2); border-radius: 12px; padding: 10px 12px 11px; vertical-align: top; transition: box-shadow .2s; }
+.pt-cc { background: var(--coop-wash); }
+.pt-dd { background: var(--defect-wash); }
+.pt-you { display: block; font-size: 30px; line-height: 1; font-weight: 860; letter-spacing: -0.03em; }
+.pt-them { display: block; font-size: 13px; color: var(--ink-2); margin-top: 5px; }
+.pt-name { display: block; font-size: 12px; color: var(--ink-3); margin-top: 6px; line-height: 1.3; }
+.pt-cell.is-last { box-shadow: inset 0 0 0 2px var(--ink); }
+.pay .fine { font-size: 14px; color: var(--ink-2); }
+
+.story { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 56px; margin-top: 80px; }
+.story section { display: grid; gap: 14px; align-content: start; }
+.story p { color: var(--ink-2); max-width: 62ch; }
+@media (max-width: 820px) { .story { grid-template-columns: minmax(0, 1fr); margin-top: 56px; } }
+.traits { margin-top: 72px; display: grid; gap: 12px; }
+.trait-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 12px; }
+@media (max-width: 1040px) { .trait-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .trait-grid { grid-template-columns: minmax(0, 1fr); } }
+.trait { display: grid; gap: 10px; align-content: start; padding: 20px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); min-width: 0; }
+.trait p { color: var(--ink-2); font-size: 15px; }
+.trait .fine { font-size: 13px; color: var(--ink-3); }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+
+/* tapes */
+.ltape { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; gap: 4px 10px; min-width: 0; }
+.ltape-label { font-size: 12px; color: var(--ink-3); font-weight: 620; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
+.tape-host { min-width: 0; line-height: 0; }
+.tape-host canvas { display: block; max-width: 100%; }
+
+/* ---------- strategies ---------- */
+.group-title { font-size: 16px; font-weight: 760; color: var(--ink); margin: 32px 0 14px; letter-spacing: -0.01em; }
+.group-title:first-child { margin-top: 0; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.card { display: flex; flex-direction: column; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px; min-width: 0; transition: background .2s; }
+.card.is-out { background: color-mix(in oklab, var(--surface) 45%, var(--paper)); }
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.card-title { font-size: 19px; line-height: 1.25; font-weight: 780; letter-spacing: -0.018em; margin: 0; overflow-wrap: anywhere; }
+.card-blurb { color: var(--ink-2); font-size: 15px; }
+.card-note { font-size: 13px; color: var(--ink-3); }
+.card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 2px; }
+.card-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: auto; font-size: 14px; font-weight: 650; }
+.card-confirm span { flex: 1 1 100%; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 650; color: var(--ink-2); padding: 3px 9px 3px 8px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); white-space: nowrap; }
+.badge i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.badge i.n { background: var(--coop); } .badge i.x { background: var(--defect); } .badge i.r { background: var(--ink-3); border-radius: 999px; }
+.prog { list-style: none; margin: 0; padding: 12px 14px; display: grid; gap: 7px; background: var(--surface-2); border-radius: 12px; font-size: 14px; line-height: 1.4; color: var(--ink-2); }
+.prog b { color: var(--ink); font-weight: 720; }
+.prog-k { font-weight: 760; color: var(--ink); margin-right: 5px; }
+.mini-moves { display: inline-flex; gap: 3px; vertical-align: -3px; }
+.mm { width: 17px; height: 17px; border-radius: 4px; display: inline-grid; place-items: center; font-size: 10px; font-weight: 850; line-height: 1; }
+.mm-c { background: var(--coop); color: var(--on-coop); }
+.mm-d { background: var(--defect); color: var(--on-defect); }
+.mm-r { background: var(--empty); color: var(--ink); }
+.fprint { display: grid; gap: 8px; }
+.switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 650; color: var(--ink-2); flex: none; user-select: none; -webkit-user-select: none; padding-top: 2px; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+.switch-track { position: relative; width: 36px; height: 22px; border-radius: 999px; background: var(--line-strong); transition: background .18s; flex: none; }
+.switch-track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 999px; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, .25); transition: transform .18s; }
+.switch input:checked + .switch-track { background: var(--ink); }
+.switch input:checked + .switch-track::after { transform: translateX(14px); }
+.switch input:focus-visible + .switch-track { outline: 2px solid var(--ink); outline-offset: 2px; }
+.empty-card { display: grid; gap: 12px; align-content: start; padding: 22px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); }
+.empty-card p { color: var(--ink-2); max-width: 46ch; }
+
+/* ---------- head to head ---------- */
+.controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 16px; margin-bottom: 20px; }
+.pick { display: grid; gap: 6px; min-width: 0; flex: 1 1 210px; }
+.pick .select { width: 100%; font-size: 16px; font-weight: 720; }
+.swap { margin-bottom: 4px; }
+.match-panel { display: grid; gap: 18px; }
+.scoreboard { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 16px; }
+.sb-side { display: grid; gap: 4px; min-width: 0; }
+.sb-right { text-align: right; }
+.sb-name { font-size: 15px; font-weight: 700; color: var(--ink-2); overflow-wrap: anywhere; line-height: 1.3; }
+.sb-score { font-size: clamp(40px, 6vw, 64px); font-weight: 880; letter-spacing: -0.045em; line-height: 1; font-feature-settings: "pnum"; font-variation-settings: "CASL" 0.3, "MONO" 0; }
+.sb-avg { font-size: 13px; color: var(--ink-3); }
+.sb-mid { font-size: 13px; color: var(--ink-3); font-weight: 650; text-align: center; padding-bottom: 6px; white-space: nowrap; }
+.playbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.playbar .spacer { flex: 1; }
+.tape-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--ink-2); }
+.tape-legend b { color: var(--ink); font-weight: 700; }
+.match-tape { min-width: 0; line-height: 0; }
+.match-tape canvas { display: block; cursor: crosshair; }
+.match-after { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; margin-top: 16px; }
+.match-after .race-panel { grid-column: 1 / -1; }
+@media (max-width: 860px) { .match-after { grid-template-columns: minmax(0, 1fr); } }
+.story-list { margin: 14px 0 0; padding-left: 20px; display: grid; gap: 8px; color: var(--ink-2); }
+.story-list li::marker { color: var(--ink-3); }
+.story-list b { color: var(--ink); }
+.pending { color: var(--ink-3); margin-top: 14px; }
+.mix { display: grid; gap: 12px; margin-top: 14px; }
+.mix-row { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) 44px; align-items: center; gap: 12px; font-size: 14px; color: var(--ink-2); line-height: 1.3; }
+.mix-track { height: 18px; min-width: 0; }
+.mix-fill { height: 18px; display: grid; grid-template-rows: 1fr 1fr; gap: 2px; min-width: 2px; transition: width .2s; }
+.mix-fill span { border-radius: 0 3px 3px 0; }
+.mix-n { text-align: right; font-weight: 720; color: var(--ink); }
+.race { position: relative; min-width: 0; margin-top: 12px; }
+.race svg, .evo svg { display: block; width: 100%; overflow: visible; }
+.ax text { font-size: 11px; fill: var(--ink-3); font-family: var(--font); }
+.ax line { stroke: var(--line); stroke-width: 1; }
+.ax .base { stroke: var(--line-strong); }
+
+/* ---------- tournament ---------- */
+.setup { display: grid; gap: 16px; margin-bottom: 22px; }
+.setup-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+.setup-fields { align-items: flex-end; }
+.setup-fields .spacer { flex: 1; }
+.setup-label { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { appearance: none; display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line-strong); background: transparent; color: var(--ink-3); padding: 5px 11px 5px 9px; border-radius: 999px; font-size: 13px; font-weight: 650; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+.chip i { width: 9px; height: 9px; border-radius: 2px; background: var(--line-strong); flex: none; }
+.chip:hover { color: var(--ink); }
+.chip[aria-pressed="true"] { color: var(--ink); background: var(--surface-2); border-color: var(--ink-3); }
+.chip[aria-pressed="true"] i.n { background: var(--coop); }
+.chip[aria-pressed="true"] i.x { background: var(--defect); }
+.run-summary { font-size: 14px; color: var(--ink-3); margin-bottom: 14px; min-height: 21px; display: flex; align-items: center; gap: 12px; }
+.progress { width: 160px; height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; flex: none; }
+.progress span { display: block; height: 100%; background: var(--ink); width: 0; }
+.insights { list-style: none; margin: 0 0 22px; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 10px 36px; }
+.insights li { font-size: 18px; line-height: 1.45; color: var(--ink); max-width: 54ch; text-wrap: pretty; }
+.insights b { font-weight: 780; }
+.t-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+.board { list-style: none; margin: 0; padding: 0; }
+.brow { display: grid; grid-template-columns: 26px minmax(130px, 230px) minmax(0, 1fr) 150px; align-items: center; gap: 14px; padding: 9px 4px; border-top: 1px solid var(--line); font-size: 14px; border-radius: 6px; }
+@media (max-width: 640px) { .brow { grid-template-columns: 20px minmax(0, 1.15fr) minmax(64px, 1fr) 112px; gap: 8px; } }
+.bhead { font-size: 12px; color: var(--ink-3); font-weight: 650; border-top: 0; padding-top: 0; }
+.brank { color: var(--ink-3); font-weight: 720; text-align: right; }
+.bname { font-weight: 680; color: var(--ink); overflow-wrap: anywhere; line-height: 1.3; }
+.bbar { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.bfill { height: 12px; border-radius: 0 4px 4px 0; flex: none; transition: width .7s cubic-bezier(.2, .7, .2, 1); }
+.bfill.n { background: var(--coop); }
+.bfill.x { background: var(--defect); }
+.bval { font-size: 13px; font-weight: 720; }
+.bwdl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; text-align: right; color: var(--ink-2); font-size: 13px; }
+.brow.is-hl { background: color-mix(in oklab, var(--ink) 5%, transparent); }
+.cross-scroll { overflow-x: auto; padding: 4px; margin: -4px; }
+.cross { display: grid; grid-template-columns: minmax(150px, max-content) repeat(var(--n), 44px); gap: 3px; width: max-content; }
+.xc-corner { font-size: 11px; color: var(--ink-3); align-self: end; padding: 0 8px 4px 0; line-height: 1.3; position: sticky; left: 0; z-index: 2; background: var(--surface); align-self: stretch; display: flex; align-items: flex-end; }
+.xc-colhead { font-size: 12px; font-weight: 720; color: var(--ink-3); text-align: center; align-self: end; padding-bottom: 4px; }
+.xc-rowhead { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 650; color: var(--ink); padding-right: 8px; line-height: 1.2; min-height: 34px; max-width: 200px; position: sticky; left: 0; z-index: 2; background: var(--surface); }
+@media (max-width: 600px) { .xc-rowhead { max-width: 128px; font-size: 12px; gap: 6px; } .cross { grid-template-columns: minmax(96px, max-content) repeat(var(--n), 44px); } }
+.xc-num { color: var(--ink-3); font-weight: 720; width: 18px; text-align: right; flex: none; }
+.xc { appearance: none; border: 0; margin: 0; padding: 0; height: 34px; border-radius: 6px; font-size: 12px; font-weight: 720; color: var(--ink); cursor: pointer; display: grid; place-items: center; background: var(--seq-lo); }
+.xc.hi { color: var(--seq-text-hi); }
+.xc.mv { background: var(--surface-2); }
+.xc:hover, .xc:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; position: relative; z-index: 1; }
+.xc:disabled { cursor: default; background: transparent; color: var(--ink-3); outline: 0; }
+.xc canvas { display: block; }
+.xc-in { animation: cellIn .45s both cubic-bezier(.2, .7, .2, 1); }
+@keyframes cellIn { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+.cross-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 16px; font-size: 12px; color: var(--ink-3); }
+.ramp-wrap { display: grid; gap: 4px; width: 200px; }
+.ramp { height: 10px; border-radius: 3px; background: linear-gradient(90deg, var(--seq-lo), var(--seq-hi)); background: linear-gradient(in oklab 90deg, var(--seq-lo), var(--seq-hi)); box-shadow: inset 0 0 0 1px var(--line); }
+.ramp-ticks { position: relative; height: 14px; }
+.ramp-ticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.ramp-ticks span:first-child { transform: none; }
+.ramp-ticks span:last-child { transform: translateX(-100%); }
+
+/* ---------- evolution ---------- */
+.e-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+@media (max-width: 980px) { .e-grid { grid-template-columns: minmax(0, 1fr); } }
+.evo { position: relative; min-width: 0; }
+.evo .band { transition: opacity .15s; }
+.evo.hl .band { opacity: .28; }
+.evo.hl .band.on { opacity: 1; }
+.evo .lbl { font-size: 12px; font-weight: 650; fill: var(--ink); font-family: var(--font); }
+.evo .lbl-v { fill: var(--ink-3); font-weight: 600; }
+.readout { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 1px; }
+.ro { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; align-items: center; gap: 10px; font-size: 14px; padding: 5px 8px; border-radius: 8px; cursor: default; }
+.ro.on { background: color-mix(in oklab, var(--ink) 6%, transparent); }
+.ro-sw { width: 12px; height: 12px; border-radius: 3px; }
+.ro-name { color: var(--ink); font-weight: 620; overflow-wrap: anywhere; line-height: 1.3; }
+.ro-val { font-weight: 720; }
+.ro-gone { font-size: 13px; color: var(--ink-3); margin-top: 12px; line-height: 1.5; }
+.e-note { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
+
+/* ---------- drawer, modal, tooltip, toast ---------- */
+.drawer { position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end; }
+.scrim { position: absolute; inset: 0; background: var(--scrim); animation: fade .2s both; }
+.drawer-panel { position: relative; width: min(640px, 100%); height: 100%; background: var(--surface); box-shadow: var(--shadow-float); display: flex; flex-direction: column; animation: slideIn .28s cubic-bezier(.2, .8, .2, 1) both; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.drawer-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px 16px 24px; border-bottom: 1px solid var(--line); }
+.drawer-body { flex: 1; overflow-y: auto; padding: 22px 24px 32px; display: grid; gap: 28px; align-content: start; overscroll-behavior: contain; }
+.drawer-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 24px; border-top: 1px solid var(--line); }
+.drawer-foot .spacer { flex: 1; }
+@media (max-width: 600px) { .drawer-head { padding-inline: 16px 10px; } .drawer-body, .drawer-foot { padding-inline: 16px; } }
+@keyframes slideIn { from { transform: translateX(48px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes fade { from { opacity: 0; } }
+.modal { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 16px; }
+.modal-panel { position: relative; width: min(520px, 100%); background: var(--surface); border-radius: 20px; padding: 24px; box-shadow: var(--shadow-float); display: grid; gap: 14px; animation: fade .2s both; }
+.note { font-size: 14px; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+.bsec { display: grid; gap: 10px; }
+.bsec-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.bsec-title { font-size: 16px; font-weight: 760; margin: 0; letter-spacing: -0.01em; }
+.bsec-hint { font-size: 13px; color: var(--ink-3); margin: 0; max-width: 60ch; }
+.form-error { color: var(--err); font-size: 13px; font-weight: 650; }
+.opening { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.mchip { width: 38px; height: 38px; border-radius: 10px; border: 0; font-weight: 870; font-size: 15px; cursor: pointer; display: grid; place-items: center; transition: transform .1s; }
+.mchip:hover { transform: translateY(-1px); }
+.mchip-c { background: var(--coop); color: var(--on-coop); }
+.mchip-d { background: var(--defect); color: var(--on-defect); }
+.mchip-r { background: var(--empty); color: var(--ink); }
+.rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.rule { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
+.rule-num { width: 24px; height: 24px; border-radius: 999px; background: var(--ink); color: var(--surface); font-size: 12px; font-weight: 820; display: grid; place-items: center; margin-top: 5px; }
+.rule-body { display: grid; gap: 8px; min-width: 0; }
+.rline { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-width: 0; }
+.rline .select { flex: 1 1 200px; }
+.kw { font-size: 13px; font-weight: 800; color: var(--ink-3); min-width: 34px; }
+.rline.otherwise { padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
+.rline.otherwise .kw { min-width: 0; margin-right: 4px; }
+.numf { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--ink-3); }
+.rule-tools { display: flex; flex-direction: column; gap: 0; }
+.rule-add { justify-self: start; }
+@media (max-width: 500px) {
+  .rule { grid-template-columns: minmax(0, 1fr) auto; }
+  .rule-num { display: none; }
+}
+.td { display: grid; gap: 14px; }
+.td-item { display: grid; gap: 6px; }
+.td-top { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+.td-name { font-weight: 680; color: var(--ink); }
+.td-score { color: var(--ink-2); white-space: nowrap; }
+.td-score b { color: var(--ink); }
+.tip { position: fixed; z-index: 80; pointer-events: none; background: var(--ink); color: var(--surface); padding: 8px 11px; border-radius: 10px; font-size: 13px; line-height: 1.45; max-width: 300px; box-shadow: var(--shadow-float); }
+.tip-title { font-weight: 760; }
+.tip-line { opacity: .82; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 12px); opacity: 0; z-index: 90; background: var(--ink); color: var(--surface); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 620; box-shadow: var(--shadow-float); transition: opacity .2s, transform .2s; max-width: calc(100% - 32px); text-align: center; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-delay: 0ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Prisoner's Dilemma Arena">
+<meta property="og:description" content="Play the repeated prisoner's dilemma, watch classic strategies face off, run Axelrod-style tournaments and evolution, and build your own strategy.">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="alternate" hreflang="th" href="../">
+<style>
+:root { padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+.top-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+.lang-link { background: transparent; color: var(--ink-2); gap: 6px; }
+.lang-link:hover { color: var(--ink); background: var(--surface); }
+.lang-link[lang="th"] { font-family: "Noto Sans Thai", "Leelawadee UI", "Thonburi", system-ui, sans-serif; }
+@media (max-width: 420px) { .topbar-inner { column-gap: 12px; } .lang-link svg { display: none; } }
+@media (max-width: 380px) { .brand-mark { display: none; } }
+@media (max-width: 340px) { .btn-build .short { display: none; } .btn-build { padding-inline: 8px; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="#play" data-goto="play">
+      <svg class="brand-mark" viewBox="0 0 38 18" aria-hidden="true">
+        <rect x="0" y="0" width="8" height="8" rx="2" style="fill:var(--coop)"/>
+        <rect x="10" y="0" width="8" height="8" rx="2" style="fill:var(--coop)"/>
+        <rect x="20" y="0" width="8" height="8" rx="2" style="fill:var(--defect)"/>
+        <rect x="30" y="0" width="8" height="8" rx="2" style="fill:var(--coop)"/>
+        <rect x="0" y="10" width="8" height="8" rx="2" style="fill:var(--coop)"/>
+        <rect x="10" y="10" width="8" height="8" rx="2" style="fill:var(--coop)"/>
+        <rect x="20" y="10" width="8" height="8" rx="2" style="fill:var(--coop)"/>
+        <rect x="30" y="10" width="8" height="8" rx="2" style="fill:var(--defect)"/>
+      </svg>
+      <span>Dilemma Arena</span>
+    </a>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" type="button" id="tab-play" data-tab="play" aria-controls="view-play" aria-selected="true">The game</button>
+      <button class="tab" role="tab" type="button" id="tab-strategies" data-tab="strategies" aria-controls="view-strategies" aria-selected="false" tabindex="-1">Strategies</button>
+      <button class="tab" role="tab" type="button" id="tab-match" data-tab="match" aria-controls="view-match" aria-selected="false" tabindex="-1">Head to head</button>
+      <button class="tab" role="tab" type="button" id="tab-tournament" data-tab="tournament" aria-controls="view-tournament" aria-selected="false" tabindex="-1">Tournament</button>
+      <button class="tab" role="tab" type="button" id="tab-evolution" data-tab="evolution" aria-controls="view-evolution" aria-selected="false" tabindex="-1">Evolution</button>
+    </nav>
+    <div class="top-actions">
+      <a class="btn btn-sm lang-link" href="../" hreflang="th" lang="th" title="อ่านหน้านี้เป็นภาษาไทย"><svg viewBox="0 0 16 16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.25"/><path d="M1.75 8h12.5M8 1.75c1.9 1.8 2.8 3.9 2.8 6.25S9.9 12.45 8 14.25C6.1 12.45 5.2 10.35 5.2 8S6.1 3.55 8 1.75Z"/></g></svg><span>ไทย</span></a>
+      <button aria-label="Build a strategy" class="btn btn-primary btn-sm btn-build" type="button" data-action="new-strategy"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><span class="long">Build a strategy</span><span class="short">Build</span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============ THE GAME ============ -->
+  <section class="view" id="view-play" role="tabpanel" aria-labelledby="tab-play">
+    <div class="wrap">
+      <div class="hero-head">
+        <h1 class="display">When does it pay to be nice?</h1>
+        <p class="lede">Each round, you and a mystery program both choose to cooperate or defect at the same moment. Neither of you sees the other&rsquo;s choice until both are made. Play ten rounds and try to finish ahead.</p>
+      </div>
+
+      <div class="hero-grid">
+        <div class="panel duel" id="duel">
+          <div class="duel-status">
+            <span id="duel-round">Round 1 of 10</span>
+            <span class="duel-score"><span>You<b id="duel-you">0</b></span><span>Them<b id="duel-them">0</b></span></span>
+          </div>
+          <div class="choices">
+            <button class="choice choice-c" type="button" id="btn-coop" data-move="C">Cooperate<small>or press C</small></button>
+            <button class="choice choice-d" type="button" id="btn-defect" data-move="D">Defect<small>or press D</small></button>
+          </div>
+          <div class="duel-board" aria-hidden="true">
+            <div class="duel-row"><span class="duel-who">You</span><div class="duel-cells" id="cells-you"></div></div>
+            <div class="duel-row"><span class="duel-who">Them</span><div class="duel-cells" id="cells-them"></div></div>
+          </div>
+          <p class="duel-msg" id="duel-msg" aria-live="polite">Make your first move.</p>
+          <div class="duel-end" id="duel-end" hidden>
+            <p class="duel-verdict" id="duel-verdict"></p>
+            <p class="duel-reveal" id="duel-reveal"></p>
+            <div class="btn-row">
+              <button class="btn btn-primary" type="button" data-action="duel-again">Play a new mystery program</button>
+              <button class="btn" type="button" data-action="duel-watch">Watch it play a full match</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="panel pay" aria-labelledby="pay-title">
+          <h2 class="h3" id="pay-title">How points work</h2>
+          <table class="paytable">
+            <caption class="sr-only">Points for each combination of moves. Your points are shown large.</caption>
+            <thead>
+              <tr>
+                <td class="corner"></td>
+                <th scope="col"><span class="sw sw-c"></span>They cooperate</th>
+                <th scope="col"><span class="sw sw-d"></span>They defect</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row"><span class="sw sw-c"></span>You cooperate</th>
+                <td class="pt-cell pt-cc" data-o="CC"><span class="pt-you">3</span><span class="pt-them">they get 3</span><span class="pt-name">Reward</span></td>
+                <td class="pt-cell" data-o="CD"><span class="pt-you">0</span><span class="pt-them">they get 5</span><span class="pt-name">Sucker&rsquo;s payoff</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><span class="sw sw-d"></span>You defect</th>
+                <td class="pt-cell" data-o="DC"><span class="pt-you">5</span><span class="pt-them">they get 0</span><span class="pt-name">Temptation</span></td>
+                <td class="pt-cell pt-dd" data-o="DD"><span class="pt-you">1</span><span class="pt-them">they get 1</span><span class="pt-name">Punishment</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="fine">In any single round, defecting earns you more whatever they do. But if you both defect, you each get 1 point instead of 3.</p>
+        </aside>
+      </div>
+
+      <div class="story">
+        <section>
+          <h2 class="h2">Why it&rsquo;s a dilemma</h2>
+          <p>Look at the table from your side. If they cooperate, defecting gets you 5 points instead of 3. If they defect, defecting gets you 1 instead of 0. Either way, defecting pays more in a single round.</p>
+          <p>The other player can reason the same way. When you both defect, you each get 1 point when you could have had 3. Play many rounds with the same partner, though, and a defection today can cost you tomorrow. Robert Axelrod called this the shadow of the future.</p>
+        </section>
+        <section>
+          <h2 class="h2">Axelrod&rsquo;s tournament</h2>
+          <p>In 1980 the political scientist Robert Axelrod invited game theorists to submit computer programs to play this game. Fourteen programs, plus one that moved at random, each played every other program and a copy of itself for 200 rounds.</p>
+          <p>The simplest program entered won: Tit for Tat, by Anatol Rapoport. It cooperates on the first move, then copies whatever its opponent did last. In a second tournament, 62 entrants knew that result and many tried to beat it. Tit for Tat won again.</p>
+          <p>Axelrod then simulated evolution. Each generation, programs got copies in proportion to their scores. Exploiters grew while easy targets lasted, then shrank once those targets were gone.</p>
+        </section>
+      </div>
+
+      <section class="traits" aria-labelledby="traits-title">
+        <h2 class="h2" id="traits-title">What winning strategies have in common</h2>
+        <p class="lede">Axelrod found four habits shared by the programs that did well.</p>
+        <div class="trait-grid">
+          <article class="trait">
+            <h3 class="h3">Nice</h3>
+            <p>Never the first to defect.</p>
+            <div class="ltape" data-demo="nice"></div>
+            <p class="fine">Tit for Tat against itself cooperates from the first round to the last.</p>
+          </article>
+          <article class="trait">
+            <h3 class="h3">Retaliatory</h3>
+            <p>Hits back right away, so exploiting it doesn&rsquo;t pay.</p>
+            <div class="ltape" data-demo="retaliate"></div>
+            <p class="fine">Tit for Tat gets exploited once by Always Defect, then never again.</p>
+          </article>
+          <article class="trait">
+            <h3 class="h3">Forgiving</h3>
+            <p>Goes back to cooperating as soon as the other player does.</p>
+            <div class="ltape" data-demo="forgive"></div>
+            <p class="fine">One defection earns one punishment, then cooperation resumes.</p>
+          </article>
+          <article class="trait">
+            <h3 class="h3">Clear</h3>
+            <p>Easy to read, so others learn quickly how to get along with it.</p>
+            <div class="ltape" data-demo="clear"></div>
+            <p class="fine">Detective tests Tit for Tat once, gets punished, and settles down.</p>
+          </article>
+        </div>
+        <div class="cta-row">
+          <button class="btn btn-primary btn-lg" type="button" data-goto="tournament">Run the tournament</button>
+          <button class="btn btn-lg" type="button" data-action="new-strategy">Build your own strategy</button>
+          <button class="btn btn-lg" type="button" data-goto="match">Watch a match</button>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ============ STRATEGIES ============ -->
+  <section class="view" id="view-strategies" role="tabpanel" aria-labelledby="tab-strategies" hidden>
+    <div class="wrap">
+      <div class="view-head view-head-row">
+        <div>
+          <h2 class="title">Strategies</h2>
+          <p class="lede">Every strategy here is a short list of rules. Read how each one works, choose which ones enter the tournament, or build your own.</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn" type="button" data-action="import">Import a code</button>
+          <button class="btn btn-primary" type="button" data-action="new-strategy">Build a strategy</button>
+        </div>
+      </div>
+      <h3 class="group-title" id="yours-title">Yours</h3>
+      <div class="cards" id="cards-yours"></div>
+      <h3 class="group-title">Classics</h3>
+      <div class="cards" id="cards-classic"></div>
+      <p class="fine" style="margin-top:18px">The strip on each card shows how the strategy answers a test opponent (top row) that defects now and then.</p>
+    </div>
+  </section>
+
+  <!-- ============ HEAD TO HEAD ============ -->
+  <section class="view" id="view-match" role="tabpanel" aria-labelledby="tab-match" hidden>
+    <div class="wrap">
+      <div class="view-head">
+        <h2 class="title">Head to head</h2>
+        <p class="lede">Pick any two strategies and watch their match unfold one move at a time.</p>
+      </div>
+      <div class="controls">
+        <div class="pick"><label class="field-label" for="h2h-a">Top row</label><select class="select" id="h2h-a"></select></div>
+        <button class="icon-btn swap" type="button" data-action="swap" aria-label="Swap the two strategies"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 7h12m0 0-3-3m3 3-3 3M16.5 13h-12m0 0 3-3m-3 3 3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="pick"><label class="field-label" for="h2h-b">Bottom row</label><select class="select" id="h2h-b"></select></div>
+        <div class="field"><label class="field-label" for="h2h-rounds">Rounds</label>
+          <select class="select" id="h2h-rounds"><option value="50">50</option><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option></select></div>
+        <div class="field"><label class="field-label" for="h2h-noise">Mistakes <output id="h2h-noise-out" for="h2h-noise">0%</output></label>
+          <input class="range" type="range" id="h2h-noise" min="0" max="10" step="1" value="0"></div>
+      </div>
+
+      <div class="panel match-panel">
+        <div class="scoreboard" aria-live="off">
+          <div class="sb-side"><span class="sb-name" id="sb-a-name"></span><span class="sb-score" id="sb-a-score">0</span><span class="sb-avg" id="sb-a-avg"></span></div>
+          <div class="sb-mid" id="sb-round">Round 0 of 200</div>
+          <div class="sb-side sb-right"><span class="sb-name" id="sb-b-name"></span><span class="sb-score" id="sb-b-score">0</span><span class="sb-avg" id="sb-b-avg"></span></div>
+        </div>
+        <div class="playbar">
+          <button class="btn btn-sm" type="button" id="pb-play"></button>
+          <button class="btn btn-sm" type="button" id="pb-end">Skip to the end</button>
+          <div class="seg" role="group" aria-label="Playback speed" id="pb-speed">
+            <button type="button" data-speed="slow" aria-pressed="false">Slow</button>
+            <button type="button" data-speed="normal" aria-pressed="true">Normal</button>
+            <button type="button" data-speed="fast" aria-pressed="false">Fast</button>
+          </div>
+          <span class="spacer"></span>
+          <button class="btn btn-sm" type="button" id="pb-dice" title="Replay with different random rolls"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="5.7" cy="5.7" r="1.1" fill="currentColor"/><circle cx="8" cy="8" r="1.1" fill="currentColor"/><circle cx="10.3" cy="10.3" r="1.1" fill="currentColor"/></svg>New dice</button>
+        </div>
+        <div class="tape-legend">
+          <span>Top row: <b id="lg-a"></b></span>
+          <span>Bottom row: <b id="lg-b"></b></span>
+          <span class="legend"><span><i class="sw sw-c"></i>Cooperate</span><span><i class="sw sw-d"></i>Defect</span></span>
+        </div>
+        <div class="match-tape" id="match-tape"></div>
+      </div>
+
+      <div class="match-after">
+        <div class="panel"><h3 class="h3">What happened</h3><ul class="story-list" id="match-story"></ul><p class="pending" id="match-pending">The story of the match appears when it ends.</p></div>
+        <div class="panel"><h3 class="h3">How the rounds went</h3><div class="mix" id="match-mix"></div></div>
+        <div class="panel race-panel">
+          <div class="panel-head" style="margin-bottom:0"><h3 class="h3">Running score</h3><div class="legend" id="race-legend"></div></div>
+          <div class="race" id="match-race"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOURNAMENT ============ -->
+  <section class="view" id="view-tournament" role="tabpanel" aria-labelledby="tab-tournament" hidden>
+    <div class="wrap">
+      <div class="view-head">
+        <h2 class="title">Tournament</h2>
+        <p class="lede">Every strategy in the lineup plays every other one, plus a copy of itself, just as in Axelrod&rsquo;s contest. Each pairing is replayed several times so that luck evens out.</p>
+      </div>
+      <div class="panel setup">
+        <div class="setup-row">
+          <span class="setup-label" id="preset-label">Lineup</span>
+          <div class="seg" role="group" aria-labelledby="preset-label" id="presets"></div>
+        </div>
+        <div class="chips" id="lineup-chips" role="group" aria-label="Strategies in the lineup"></div>
+        <div class="setup-row setup-fields">
+          <div class="field"><label class="field-label" for="t-rounds">Rounds per match</label>
+            <select class="select" id="t-rounds"><option value="50">50</option><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option></select></div>
+          <div class="field"><label class="field-label" for="t-reps">Replays per pairing</label>
+            <select class="select" id="t-reps"><option value="1">1</option><option value="5">5</option><option value="20">20</option><option value="100" selected>100</option></select></div>
+          <div class="field"><label class="field-label" for="t-noise">Mistakes <output id="t-noise-out" for="t-noise">0%</output></label>
+            <input class="range" type="range" id="t-noise" min="0" max="10" step="1" value="0"></div>
+          <label class="check" for="t-self"><input type="checkbox" id="t-self" checked>Each plays a copy of itself</label>
+          <span class="spacer"></span>
+          <button class="btn btn-primary" type="button" id="t-run"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="5.7" cy="5.7" r="1.1" fill="currentColor"/><circle cx="8" cy="8" r="1.1" fill="currentColor"/><circle cx="10.3" cy="10.3" r="1.1" fill="currentColor"/></svg>Run again with new dice</button>
+        </div>
+      </div>
+
+      <div class="run-summary" id="t-summary" aria-live="polite"></div>
+      <ul class="insights" id="t-insights"></ul>
+
+      <div class="t-grid" id="t-results">
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="h3">Leaderboard</h3>
+            <div class="legend"><span><i class="sw sw-c"></i>Never defects first</span><span><i class="sw sw-d"></i>Defects first</span></div>
+          </div>
+          <ol class="board" id="t-board"></ol>
+          <p class="fine" style="margin-top:12px">Average points per round over every match. Won, drew and lost count head-to-head results.</p>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="h3">Every pairing</h3>
+            <div class="seg" role="group" aria-label="Show in each cell" id="t-view">
+              <button type="button" data-view="points" aria-pressed="true">Points</button>
+              <button type="button" data-view="moves" aria-pressed="false">Moves</button>
+            </div>
+          </div>
+          <div class="cross-scroll"><div class="cross" id="t-cross"></div></div>
+          <div class="cross-legend" id="t-cross-legend"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EVOLUTION ============ -->
+  <section class="view" id="view-evolution" role="tabpanel" aria-labelledby="tab-evolution" hidden>
+    <div class="wrap">
+      <div class="view-head">
+        <h2 class="title">Evolution</h2>
+        <p class="lede">Axelrod&rsquo;s follow-up experiment. Each generation, a strategy&rsquo;s share of the population grows or shrinks with its average score against everyone still around. Strategies that live off exploiting others run out of victims.</p>
+      </div>
+      <div class="panel setup">
+        <div class="setup-row setup-fields">
+          <div class="field"><label class="field-label" for="e-start">Starting population</label>
+            <select class="select" id="e-start">
+              <option value="equal" selected>Equal shares</option>
+              <option value="nice">80% never defect first</option>
+              <option value="nasty">80% defect first</option>
+            </select></div>
+          <div class="field"><label class="field-label" for="e-gens">Generations</label>
+            <select class="select" id="e-gens"><option value="50" selected>50</option><option value="150">150</option><option value="500">500</option><option value="1000">1,000</option></select></div>
+          <div class="field"><label class="field-label" for="e-noise">Mistakes <output id="e-noise-out" for="e-noise">0%</output></label>
+            <input class="range" type="range" id="e-noise" min="0" max="10" step="1" value="0"></div>
+          <span class="spacer"></span>
+          <button class="btn btn-primary" type="button" id="e-run"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.2 8a4.8 4.8 0 1 0 1.4-3.4M3.2 2.8v2.6h2.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Replay</button>
+        </div>
+        <p class="fine e-note"><span id="e-lineup-note"></span><button class="link-btn" type="button" data-goto="tournament">Change the lineup</button></p>
+      </div>
+
+      <ul class="insights" id="e-insights"></ul>
+
+      <div class="e-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="h3">Share of the population</h3>
+            <div class="legend"><span><i class="sw sw-c"></i>Never defects first</span><span><i class="sw sw-d"></i>Defects first</span></div>
+          </div>
+          <div class="evo" id="e-chart"></div>
+        </div>
+        <div class="panel">
+          <h3 class="h3" id="e-read-title">Generation 50</h3>
+          <ol class="readout" id="e-readout"></ol>
+          <p class="ro-gone" id="e-gone"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ BUILDER ============ -->
+<div class="drawer" id="builder" hidden>
+  <div class="scrim" data-close="builder"></div>
+  <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="builder-title">
+    <div class="drawer-head">
+      <h2 class="h3" id="builder-title">Build a strategy</h2>
+      <button class="icon-btn" type="button" data-close="builder" aria-label="Close"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="drawer-body">
+      <p class="note" id="b-note" hidden></p>
+      <div class="bsec">
+        <label class="bsec-title" for="b-name">Name</label>
+        <input class="text-input" id="b-name" type="text" maxlength="40" autocomplete="off" spellcheck="false">
+        <p class="form-error" id="b-name-err" hidden>Give your strategy a name before saving.</p>
+      </div>
+      <div class="bsec">
+        <h3 class="bsec-title">Opening moves</h3>
+        <p class="bsec-hint">Played in this order at the start of every match. Click a move to cycle through cooperate, defect and random.</p>
+        <div class="opening" id="b-opening"></div>
+      </div>
+      <div class="bsec">
+        <h3 class="bsec-title">After that, each round</h3>
+        <p class="bsec-hint">Rules are checked from the top. The first rule that matches decides the move. &ldquo;They&rdquo; means the opponent.</p>
+        <ol class="rules" id="b-rules"></ol>
+        <button class="btn btn-sm rule-add" type="button" id="b-add-rule" data-focus="b-add"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>Add a rule</button>
+        <div class="rline otherwise" id="b-otherwise"></div>
+      </div>
+      <div class="bsec">
+        <div class="bsec-row"><h3 class="bsec-title">Test drive</h3><div class="badges" id="b-badges"></div></div>
+        <p class="bsec-hint">The first 24 rounds against four classics, with your strategy on the top row. Scores are for a full 200-round match.</p>
+        <div class="td" id="b-test"></div>
+      </div>
+    </div>
+    <div class="drawer-foot">
+      <button class="btn btn-sm" type="button" id="b-share"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="7.5" height="7.5" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 10.5V4a1 1 0 0 1 1-1h6.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Copy share code</button>
+      <span class="spacer"></span>
+      <button class="btn" type="button" data-close="builder">Cancel</button>
+      <button class="btn btn-primary" type="button" id="b-save">Save strategy</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ IMPORT / SHARE CODE ============ -->
+<div class="modal" id="importer" hidden>
+  <div class="scrim" data-close="importer"></div>
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="imp-title">
+    <h2 class="h3" id="imp-title">Import a strategy</h2>
+    <p class="bsec-hint">Paste a share code someone sent you. Codes start with PDA1.</p>
+    <label class="sr-only" for="imp-code">Share code</label>
+    <textarea class="text-input" id="imp-code" rows="4" spellcheck="false" autocomplete="off"></textarea>
+    <p class="form-error" id="imp-err" hidden></p>
+    <div class="btn-row end"><button class="btn" type="button" data-close="importer">Cancel</button><button class="btn btn-primary" type="button" id="imp-go">Import strategy</button></div>
+  </div>
+</div>
+
+<div class="modal" id="codebox" hidden>
+  <div class="scrim" data-close="codebox"></div>
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="code-title">
+    <h2 class="h3" id="code-title">Share code</h2>
+    <p class="bsec-hint" id="code-hint">Copy this code and send it to someone. They can paste it into Import a code on the Strategies tab.</p>
+    <label class="sr-only" for="code-text">Share code</label>
+    <textarea class="text-input" id="code-text" rows="4" readonly spellcheck="false"></textarea>
+    <div class="btn-row end"><button class="btn btn-primary" type="button" data-close="codebox">Done</button></div>
+  </div>
+</div>
+
+<div class="tip" id="tip" role="tooltip" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script>
+(function () {
+'use strict';
+/* ===== Prisoner's Dilemma engine =====
+   Strategies are plain data (opening moves + ordered rules + fallback), compiled
+   to small closures. No eval: user strategies can only use this vocabulary. */
+const C = 0, D = 1;
+
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashSeed() {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < arguments.length; i++) {
+    h ^= (arguments[i] | 0) + 0x9e3779b9 + (h << 6) + (h >>> 2);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h >>> 0;
+}
+
+const clampInt = (v, lo, hi, dflt) => {
+  v = Math.round(Number(v));
+  if (!Number.isFinite(v)) v = dflt;
+  return Math.min(hi, Math.max(lo, v));
+};
+const mv = m => (m === 'D' ? D : C);
+
+const COND_TYPES = ['theyLast', 'theyStreak', 'theyRecent', 'theyEver', 'theyNever', 'theyRate', 'meLast', 'score', 'outcome', 'same', 'every', 'after', 'chance'];
+const ACTIONS = ['C', 'D', 'copy', 'opposite', 'repeat', 'switch', 'random'];
+
+function fixAction(a) {
+  a = a && typeof a === 'object' ? a : { type: 'C' };
+  const type = ACTIONS.includes(a.type) ? a.type : 'C';
+  const o = { type };
+  if (type === 'random') o.p = clampInt(a.p, 0, 100, 50);
+  return o;
+}
+function fixCond(c) {
+  c = c && typeof c === 'object' ? c : {};
+  const type = COND_TYPES.includes(c.type) ? c.type : 'theyLast';
+  const o = { type };
+  switch (type) {
+    case 'theyLast': case 'meLast': o.m = c.m === 'C' ? 'C' : 'D'; break;
+    case 'theyStreak': o.n = clampInt(c.n, 2, 20, 2); break;
+    case 'theyRecent': o.k = 1; o.n = clampInt(c.n, 1, 50, 3); o.k = clampInt(c.k, 1, o.n, 1); break;
+    case 'theyRate': o.p = clampInt(c.p, 1, 100, 50); break;
+    case 'score': o.s = ['behind', 'ahead', 'tied'].includes(c.s) ? c.s : 'behind'; break;
+    case 'outcome': o.o = ['CC', 'CD', 'DC', 'DD'].includes(c.o) ? c.o : 'CD'; break;
+    case 'same': o.v = c.v === 'diff' ? 'diff' : 'same'; break;
+    case 'every': o.n = clampInt(c.n, 2, 100, 10); break;
+    case 'after': o.n = clampInt(c.n, 1, 1000, 100); break;
+    case 'chance': o.p = clampInt(c.p, 1, 99, 10); break;
+  }
+  return o;
+}
+/* Normalise any (possibly user-supplied) definition into a safe canonical shape. */
+function sanitize(def) {
+  def = def && typeof def === 'object' ? def : {};
+  const out = {};
+  out.name = String(def.name || 'Untitled').replace(/\s+/g, ' ').trim().slice(0, 40) || 'Untitled';
+  let open = Array.isArray(def.opening) ? def.opening : ['C'];
+  open = open.slice(0, 10).map(m => (m === 'D' ? 'D' : m === '?' ? '?' : 'C'));
+  if (!open.length) open = ['C'];
+  out.opening = open;
+  const rules = Array.isArray(def.rules) ? def.rules.slice(0, 12) : [];
+  out.rules = rules.map(r => ({
+    when: (r && Array.isArray(r.when) && r.when.length ? r.when : [{}]).slice(0, 3).map(fixCond),
+    then: fixAction(r && r.then),
+  }));
+  out.otherwise = fixAction(def.otherwise);
+  return out;
+}
+
+function compileCond(c) {
+  switch (c.type) {
+    case 'theyLast': { const m = mv(c.m); return x => x.op[x.t - 1] === m; }
+    case 'meLast': { const m = mv(c.m); return x => x.me[x.t - 1] === m; }
+    case 'theyStreak': {
+      const n = c.n;
+      return x => { if (x.t < n) return false; for (let i = 1; i <= n; i++) if (x.op[x.t - i] !== D) return false; return true; };
+    }
+    case 'theyRecent': {
+      const n = c.n, k = c.k;
+      return x => { let cnt = 0; for (let i = Math.max(0, x.t - n); i < x.t; i++) cnt += x.op[i]; return cnt >= k; };
+    }
+    case 'theyEver': return x => x.opD > 0;
+    case 'theyNever': return x => x.opD === 0;
+    case 'theyRate': { const p = c.p / 100; return x => (x.t - x.opD) / x.t < p; }
+    case 'score':
+      if (c.s === 'ahead') return x => x.myScore > x.opScore;
+      if (c.s === 'tied') return x => x.myScore === x.opScore;
+      return x => x.myScore < x.opScore;
+    case 'outcome': { const a = mv(c.o[0]), b = mv(c.o[1]); return x => x.me[x.t - 1] === a && x.op[x.t - 1] === b; }
+    case 'same': return c.v === 'diff' ? (x => x.me[x.t - 1] !== x.op[x.t - 1]) : (x => x.me[x.t - 1] === x.op[x.t - 1]);
+    case 'every': { const n = c.n; return x => (x.t + 1) % n === 0; }
+    case 'after': { const n = c.n; return x => x.t + 1 > n; }
+    case 'chance': { const p = c.p / 100; return x => x.rng() < p; }
+  }
+  return () => false;
+}
+function compileAction(a) {
+  switch (a.type) {
+    case 'C': return () => C;
+    case 'D': return () => D;
+    case 'copy': return x => x.op[x.t - 1];
+    case 'opposite': return x => 1 - x.op[x.t - 1];
+    case 'repeat': return x => x.me[x.t - 1];
+    case 'switch': return x => 1 - x.me[x.t - 1];
+    case 'random': { const p = a.p / 100; return x => (x.rng() < p ? C : D); }
+  }
+  return () => C;
+}
+function usesChance(def) {
+  const d = sanitize(def);
+  const rnd = a => a.type === 'random' && a.p > 0 && a.p < 100;
+  if (d.opening.includes('?') || rnd(d.otherwise)) return true;
+  return d.rules.some(r => rnd(r.then) || r.when.some(c => c.type === 'chance'));
+}
+function compile(def) {
+  const d = sanitize(def);
+  const opening = d.opening.map(m => (m === 'D' ? D : m === '?' ? 2 : C));
+  const rules = d.rules.map(r => ({ when: r.when.map(compileCond), then: compileAction(r.then) }));
+  const other = compileAction(d.otherwise);
+  const nOpen = opening.length;
+  const decide = x => {
+    if (x.t < nOpen) { const o = opening[x.t]; return o === 2 ? (x.rng() < 0.5 ? C : D) : o; }
+    outer: for (let i = 0; i < rules.length; i++) {
+      const w = rules[i].when;
+      for (let j = 0; j < w.length; j++) if (!w[j](x)) continue outer;
+      return rules[i].then(x);
+    }
+    return other(x);
+  };
+  return { decide, random: usesChance(d) };
+}
+
+const DEFAULT_PAY = { T: 5, R: 3, P: 1, S: 0 };
+function payTable(p) { return [[p.R, p.S], [p.T, p.P]]; } // PAY[mine][theirs]
+const PAY = payTable(DEFAULT_PAY);
+
+function playMatch(sa, sb, rounds, noise, rng) {
+  const a = new Uint8Array(rounds), b = new Uint8Array(rounds);
+  const xa = { t: 0, me: a, op: b, myD: 0, opD: 0, myScore: 0, opScore: 0, rng };
+  const xb = { t: 0, me: b, op: a, myD: 0, opD: 0, myScore: 0, opScore: 0, rng };
+  const n = [0, 0, 0, 0]; // CC, CD, DC, DD from A's side
+  for (let t = 0; t < rounds; t++) {
+    xa.t = xb.t = t;
+    let ma = sa.decide(xa), mb = sb.decide(xb);
+    if (noise > 0) { if (rng() < noise) ma = 1 - ma; if (rng() < noise) mb = 1 - mb; }
+    a[t] = ma; b[t] = mb;
+    const pa = PAY[ma][mb], pb = PAY[mb][ma];
+    xa.myScore += pa; xa.opScore += pb; xb.myScore += pb; xb.opScore += pa;
+    if (ma) { xa.myD++; xb.opD++; }
+    if (mb) { xb.myD++; xa.opD++; }
+    n[ma * 2 + mb]++;
+  }
+  return { a, b, scoreA: xa.myScore, scoreB: xb.myScore, counts: n, rounds };
+}
+
+/* A strategy against a fixed, non-reacting script of moves ("CCDC..."). */
+function vsScript(def, script, seed) {
+  const s = compile(def), n = script.length;
+  const me = new Uint8Array(n), op = new Uint8Array(n);
+  for (let i = 0; i < n; i++) op[i] = script[i] === 'D' ? D : C;
+  const x = { t: 0, me, op, myD: 0, opD: 0, myScore: 0, opScore: 0, rng: mulberry32(seed || 11) };
+  for (let t = 0; t < n; t++) {
+    x.t = t;
+    const m = s.decide(x), o = op[t];
+    me[t] = m;
+    x.myScore += PAY[m][o]; x.opScore += PAY[o][m];
+    if (m) x.myD++;
+    if (o) x.opD++;
+  }
+  return { mine: me, theirs: op };
+}
+
+/* Round robin, as a generator so the page can run it in slices.
+   Result: M[i][j] = i's average points per round against j. */
+function* tournamentSteps(defs, opt) {
+  const o = Object.assign({ rounds: 200, reps: 5, noise: 0, selfPlay: true, seed: 1 }, opt);
+  const n = defs.length;
+  const S = defs.map(compile);
+  const M = Array.from({ length: n }, () => new Array(n).fill(null));
+  const wins = new Array(n).fill(0), draws = new Array(n).fill(0), losses = new Array(n).fill(0);
+  const sample = Array.from({ length: n }, () => new Array(n).fill(null));
+  const total = o.selfPlay ? n * (n + 1) / 2 : n * (n - 1) / 2;
+  let matches = 0, done = 0;
+  for (let i = 0; i < n; i++) {
+    for (let j = i; j < n; j++) {
+      if (i === j && !o.selfPlay) continue;
+      let si = 0, sj = 0;
+      for (let r = 0; r < o.reps; r++) {
+        const rng = mulberry32(hashSeed(o.seed, i, j, r));
+        const m = playMatch(S[i], S[j], o.rounds, o.noise, rng);
+        si += m.scoreA; sj += m.scoreB; matches++;
+        if (r === 0) { sample[i][j] = { mine: m.a, theirs: m.b }; sample[j][i] = { mine: m.b, theirs: m.a }; }
+      }
+      const tot = o.reps * o.rounds;
+      if (i === j) {
+        M[i][i] = (si + sj) / (2 * tot);
+      } else {
+        M[i][j] = si / tot; M[j][i] = sj / tot;
+        const diff = si - sj, eps = 1e-9 * tot;
+        if (diff > eps) { wins[i]++; losses[j]++; }
+        else if (diff < -eps) { wins[j]++; losses[i]++; }
+        else { draws[i]++; draws[j]++; }
+      }
+      done++;
+      yield done / total;
+    }
+  }
+  const avg = M.map(row => {
+    let s = 0, k = 0;
+    row.forEach(v => { if (v !== null) { s += v; k++; } });
+    return k ? s / k : 0;
+  });
+  return { M, avg, wins, draws, losses, sample, matches, moves: matches * o.rounds * 2, opt: o };
+}
+function runTournament(defs, opt) {
+  const g = tournamentSteps(defs, opt);
+  let r;
+  do { r = g.next(); } while (!r.done);
+  return r.value;
+}
+
+/* Discrete replicator dynamics, as in Axelrod's ecological tournament. */
+function evolve(M, x0, gens) {
+  const n = M.length;
+  let x = x0.slice();
+  const s0 = x.reduce((a, b) => a + b, 0) || 1;
+  x = x.map(v => v / s0);
+  const hist = [x.slice()];
+  for (let g = 0; g < gens; g++) {
+    const f = new Array(n).fill(0);
+    let fbar = 0;
+    for (let i = 0; i < n; i++) {
+      if (x[i] <= 0) continue;
+      let s = 0;
+      for (let j = 0; j < n; j++) s += M[i][j] * x[j];
+      f[i] = s; fbar += x[i] * s;
+    }
+    if (fbar > 0) {
+      let tot = 0;
+      for (let i = 0; i < n; i++) { x[i] = x[i] * f[i] / fbar; if (x[i] < 1e-9) x[i] = 0; tot += x[i]; }
+      for (let i = 0; i < n; i++) x[i] /= tot;
+    }
+    hist.push(x.slice());
+  }
+  return hist;
+}
+
+/* "Nice" = never the first to defect. Against a pure cooperator it must never defect. */
+const ALLC_DEF = { name: 'Always Cooperate', opening: ['C'], rules: [], otherwise: { type: 'C' } };
+function isNice(def) {
+  const s = compile(def), c = compile(ALLC_DEF);
+  for (let seed = 1; seed <= 3; seed++) {
+    const m = playMatch(s, c, 400, 0, mulberry32(seed * 7919));
+    if (m.counts[2] + m.counts[3] > 0) return false;
+  }
+  return true;
+}
+
+
+const BUILTINS = [
+  { id: 'tft', name: 'Tit for Tat', blurb: 'Cooperates first, then copies whatever you did last round.',
+    note: 'Submitted by Anatol Rapoport. It won both of Axelrod’s tournaments.',
+    opening: ['C'], rules: [], otherwise: { type: 'copy' } },
+  { id: 'allc', name: 'Always Cooperate', blurb: 'Cooperates every round, no matter what.',
+    note: 'Kind, and easy to exploit.',
+    opening: ['C'], rules: [], otherwise: { type: 'C' } },
+  { id: 'alld', name: 'Always Defect', blurb: 'Defects every round, no matter what.',
+    note: 'The “rational” move in a one-off game.',
+    opening: ['D'], rules: [], otherwise: { type: 'D' } },
+  { id: 'grudger', name: 'Grudger', blurb: 'Cooperates until you defect once. After that it never cooperates again.',
+    note: 'Also called Grim Trigger. James Friedman entered a version of it.',
+    opening: ['C'], rules: [{ when: [{ type: 'theyEver' }], then: { type: 'D' } }], otherwise: { type: 'C' } },
+  { id: 'random', name: 'Random', blurb: 'Flips a coin every round.',
+    note: 'Axelrod added it to both tournaments as a baseline.',
+    opening: ['?'], rules: [], otherwise: { type: 'random', p: 50 } },
+  { id: 'tf2t', name: 'Tit for Two Tats', blurb: 'Only defects after you defect twice in a row.',
+    note: 'Axelrod noted it would have won the first tournament. In the second, entrants exploited it.',
+    opening: ['C'], rules: [{ when: [{ type: 'theyStreak', n: 2 }], then: { type: 'D' } }], otherwise: { type: 'C' } },
+  { id: 'wsls', name: 'Win-Stay, Lose-Shift', blurb: 'Repeats its move after a good result (3 or 5 points) and switches after a bad one (0 or 1).',
+    note: 'Also called Pavlov. In practice: it cooperates whenever you both made the same move.',
+    opening: ['C'], rules: [{ when: [{ type: 'same', v: 'same' }], then: { type: 'C' } }], otherwise: { type: 'D' } },
+  { id: 'gtft', name: 'Generous Tit for Tat', blurb: 'Like Tit for Tat, but lets one defection in ten go unpunished.',
+    note: 'Forgiveness stops two copycats from punishing each other forever after one mistake.',
+    opening: ['C'], rules: [{ when: [{ type: 'theyLast', m: 'D' }], then: { type: 'random', p: 10 } }], otherwise: { type: 'C' } },
+  { id: 'stft', name: 'Suspicious Tit for Tat', blurb: 'Tit for Tat, except it defects on the first move.',
+    note: 'One nasty opening move is enough to spoil many relationships.',
+    opening: ['D'], rules: [], otherwise: { type: 'copy' } },
+  { id: 'joss', name: 'Joss', blurb: 'Plays Tit for Tat, but sneaks in a defection about one round in ten.',
+    note: 'Entered by Johann Joss in the first tournament.',
+    opening: ['C'], rules: [{ when: [{ type: 'chance', p: 10 }], then: { type: 'D' } }], otherwise: { type: 'copy' } },
+  { id: 'detective', name: 'Detective', blurb: 'Opens with cooperate, defect, cooperate, cooperate. If you never hit back, it exploits you. If you do, it plays Tit for Tat.',
+    note: 'A prober: it tests whether you can be pushed around.',
+    opening: ['C', 'D', 'C', 'C'], rules: [{ when: [{ type: 'theyNever' }], then: { type: 'D' } }], otherwise: { type: 'copy' } },
+  { id: 'alt', name: 'Alternator', blurb: 'Cooperates, then defects, then cooperates, and so on.',
+    note: 'Completely predictable, and ignores you entirely.',
+    opening: ['C'], rules: [], otherwise: { type: 'switch' } },
+  { id: 'smaj', name: 'Soft Majority', blurb: 'Cooperates as long as you have cooperated at least half the time.',
+    note: 'Judges your whole record, not just the last round.',
+    opening: ['C'], rules: [{ when: [{ type: 'theyRate', p: 50 }], then: { type: 'D' } }], otherwise: { type: 'C' } },
+  { id: 'ext2', name: 'Extortioner', blurb: 'Tuned so that its lead over you grows every time you gain. It never scores less than its opponent in the long run.',
+    note: 'A zero-determinant strategy (Press and Dyson, 2012). It wins head to head and still loses tournaments.',
+    opening: ['C'], rules: [
+      { when: [{ type: 'outcome', o: 'CC' }], then: { type: 'random', p: 89 } },
+      { when: [{ type: 'outcome', o: 'CD' }], then: { type: 'random', p: 50 } },
+      { when: [{ type: 'outcome', o: 'DC' }], then: { type: 'random', p: 33 } },
+    ], otherwise: { type: 'D' } },
+];
+
+/* ======================= constants ======================= */
+const CLASSIC = ['tft', 'allc', 'alld', 'grudger', 'random', 'tf2t', 'stft', 'joss', 'detective', 'smaj'];
+const PRESETS = [
+  { id: 'classic', label: 'Axelrod classics', ids: CLASSIC, noise: 0 },
+  { id: 'everyone', label: 'Everyone', ids: null, noise: 0 },
+  { id: 'mistakes', label: 'With mistakes', ids: CLASSIC.concat(['gtft', 'wsls']), noise: 5 },
+  { id: 'tough', label: 'Tough crowd', ids: ['tft', 'gtft', 'wsls', 'grudger', 'alld', 'joss', 'stft', 'detective', 'ext2', 'random'], noise: 0 },
+];
+const PROBE = 'CCCCDCCCCDDCCCCDDDCCCCCC';
+const DUEL_POOL = ['tft', 'grudger', 'alld', 'joss', 'wsls', 'detective', 'allc', 'tf2t', 'stft', 'random', 'gtft', 'smaj'];
+const TD_OPP = ['tft', 'alld', 'allc', 'random'];
+const TABS = ['play', 'strategies', 'match', 'tournament', 'evolution'];
+const SPEEDS = { slow: 8, normal: 45, fast: 220 };
+const LS_KEY = 'dilemma-arena-v1';
+const FONT = '"Recursive", ui-sans-serif, system-ui, sans-serif';
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+const ICON = {
+  up: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.5v-9m0 0L4.5 7M8 3.5 11.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  down: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.5v9m0 0L4.5 9M8 12.5 11.5 9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  trash: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M6.3 4.5V3h3.4v1.5M4.6 4.5l.6 8.5h5.6l.6-8.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  x: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  plus: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>',
+  minus: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8h9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>',
+  play: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.3v9.4l7.6-4.7z" fill="currentColor"/></svg>',
+  pause: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.2 3.5v9M10.8 3.5v9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+  replay: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.2 8a4.8 4.8 0 1 0 1.4-3.4M3.2 2.8v2.6h2.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+
+/* ======================= helpers ======================= */
+const $ = (s, root) => (root || document).querySelector(s);
+const $$ = (s, root) => Array.from((root || document).querySelectorAll(s));
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  if (props) {
+    for (const k in props) {
+      const v = props[k];
+      if (v === null || v === undefined || v === false) continue;
+      if (k === 'class') el.className = v;
+      else if (k === 'html') el.innerHTML = v;
+      else if (k === 'style') el.setAttribute('style', v);
+      else if (k.slice(0, 2) === 'on' && typeof v === 'function') el.addEventListener(k.slice(2), v);
+      else if (v === true) el[k] = true;
+      else el.setAttribute(k, v);
+    }
+  }
+  for (const kid of kids.flat(Infinity)) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+  }
+  return el;
+}
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  if (attrs) for (const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+const fmtInt = n => Math.round(n).toLocaleString('en-US');
+const fmt2 = n => n.toFixed(2);
+const pct = (v, d) => (v * 100).toFixed(d || 0) + '%';
+const bold = t => h('b', null, t);
+const truncate = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
+function ordinal(n) { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+function debounce(fn, ms) { let t; return function () { const a = arguments; clearTimeout(t); t = setTimeout(() => fn.apply(null, a), ms); }; }
+function niceStep(max, n) {
+  const raw = Math.max(max, 1e-9) / n, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+  return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
+}
+const niceCeil = (max, n) => { const s = niceStep(max, n || 4); return Math.ceil(max / s - 1e-9) * s; };
+function niceTicks(max, n) { const s = niceStep(max, n), out = []; for (let v = 0; v <= max + 1e-9; v += s) out.push(Math.round(v * 1000) / 1000); return out; }
+const moveWord = m => (m === 'C' ? 'cooperate' : m === 'D' ? 'defect' : 'random');
+
+/* ======================= store ======================= */
+const store = { customs: [], lineup: new Set(CLASSIC) };
+const all = () => store.customs.concat(BUILTINS);
+const byId = id => all().find(s => s.id === id) || null;
+const idOk = id => typeof id === 'string' && /^u[a-z0-9]{4,16}$/.test(id);
+const newId = () => 'u' + (Math.random().toString(36).slice(2, 10) + '000000').slice(0, 8);
+function load() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (d && Array.isArray(d.customs)) {
+      store.customs = d.customs.filter(c => c && idOk(c.id)).slice(0, 60)
+        .map(c => Object.assign(sanitize(c), { id: c.id, custom: true }));
+    }
+    if (d && Array.isArray(d.lineup)) {
+      const s = new Set(d.lineup.filter(id => byId(id)));
+      if (s.size >= 2) store.lineup = s;
+    }
+  } catch (e) { /* storage blocked or unreadable: start fresh */ }
+}
+function persist() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      customs: store.customs.map(s => ({ id: s.id, name: s.name, opening: s.opening, rules: s.rules, otherwise: s.otherwise })),
+      lineup: Array.from(store.lineup),
+    }));
+  } catch (e) { /* storage blocked: keep working in memory */ }
+}
+const defKey = s => JSON.stringify([s.opening, s.rules, s.otherwise]);
+const metaCache = new Map(), compiledCache = new Map();
+function meta(s) {
+  const key = defKey(s);
+  let m = metaCache.get(key);
+  if (!m) { m = { nice: isNice(s), chance: usesChance(s), finger: vsScript(s, PROBE, 5) }; metaCache.set(key, m); }
+  return m;
+}
+function compiled(s) {
+  const key = defKey(s);
+  let c = compiledCache.get(key);
+  if (!c) { c = compile(s); compiledCache.set(key, c); }
+  return c;
+}
+const lineupDefs = () => all().filter(s => store.lineup.has(s.id));
+
+/* ======================= rule text ======================= */
+function condText(c) {
+  switch (c.type) {
+    case 'theyLast': return c.m === 'D' ? 'they defected last round' : 'they cooperated last round';
+    case 'theyStreak': return `they defected ${c.n} rounds in a row`;
+    case 'theyRecent': return `they defected ${c.k === 1 ? 'at least once' : `at least ${c.k} times`} in the last ${c.n === 1 ? 'round' : c.n + ' rounds'}`;
+    case 'theyEver': return 'they have ever defected';
+    case 'theyNever': return 'they have never defected';
+    case 'theyRate': return `they have cooperated less than ${c.p}% of the time`;
+    case 'meLast': return c.m === 'D' ? 'I defected last round' : 'I cooperated last round';
+    case 'score': return c.s === 'ahead' ? 'I’m ahead on points' : c.s === 'tied' ? 'we’re tied on points' : 'I’m behind on points';
+    case 'outcome': return { CC: 'we both cooperated last round', CD: 'I cooperated and they defected last round', DC: 'I defected and they cooperated last round', DD: 'we both defected last round' }[c.o];
+    case 'same': return c.v === 'diff' ? 'we made different moves last round' : 'we made the same move last round';
+    case 'every': return `the round number is a multiple of ${c.n}`;
+    case 'after': return `we’re past round ${c.n}`;
+    case 'chance': return `a ${c.p}% chance comes up`;
+  }
+  return '';
+}
+function actText(a) {
+  switch (a.type) {
+    case 'C': return 'cooperate';
+    case 'D': return 'defect';
+    case 'copy': return 'copy their last move';
+    case 'opposite': return 'do the opposite of their last move';
+    case 'repeat': return 'repeat my last move';
+    case 'switch': return 'switch from my last move';
+    case 'random': return `cooperate ${a.p}% of the time`;
+  }
+  return '';
+}
+const COND_OPTIONS = [
+  { group: 'What they did', items: [
+    ['theyLast:D', 'they defected last round'],
+    ['theyLast:C', 'they cooperated last round'],
+    ['theyStreak', 'they defected N rounds in a row'],
+    ['theyRecent', 'they defected at least K of the last N rounds'],
+    ['theyEver', 'they have ever defected'],
+    ['theyNever', 'they have never defected'],
+    ['theyRate', 'they cooperated less than P% of the time'],
+  ] },
+  { group: 'What I did', items: [
+    ['meLast:D', 'I defected last round'],
+    ['meLast:C', 'I cooperated last round'],
+    ['score:behind', 'I’m behind on points'],
+    ['score:ahead', 'I’m ahead on points'],
+    ['score:tied', 'we’re tied on points'],
+  ] },
+  { group: 'Last round, together', items: [
+    ['outcome:CC', 'we both cooperated last round'],
+    ['outcome:CD', 'I cooperated and they defected'],
+    ['outcome:DC', 'I defected and they cooperated'],
+    ['outcome:DD', 'we both defected last round'],
+    ['same:same', 'we made the same move last round'],
+    ['same:diff', 'we made different moves last round'],
+  ] },
+  { group: 'Timing and luck', items: [
+    ['every', 'the round number is a multiple of N'],
+    ['after', 'we’re past round N'],
+    ['chance', 'a P% chance comes up'],
+  ] },
+];
+const ACT_OPTIONS = [
+  ['C', 'cooperate'], ['D', 'defect'], ['copy', 'copy their last move'], ['opposite', 'do the opposite of their last move'],
+  ['repeat', 'repeat my last move'], ['switch', 'switch from my last move'], ['random', 'cooperate P% of the time'],
+];
+const PARAMS = {
+  theyStreak: [{ k: 'n', label: 'N', min: 2, max: 20 }],
+  theyRecent: [{ k: 'k', label: 'K', min: 1, max: 50 }, { k: 'n', label: 'N', min: 1, max: 50 }],
+  theyRate: [{ k: 'p', label: 'P', suffix: '%', min: 1, max: 100 }],
+  every: [{ k: 'n', label: 'N', min: 2, max: 100 }],
+  after: [{ k: 'n', label: 'N', min: 1, max: 1000 }],
+  chance: [{ k: 'p', label: 'P', suffix: '%', min: 1, max: 99 }],
+};
+function condKey(c) {
+  if (c.type === 'theyLast' || c.type === 'meLast') return c.type + ':' + c.m;
+  if (c.type === 'score') return 'score:' + c.s;
+  if (c.type === 'outcome') return 'outcome:' + c.o;
+  if (c.type === 'same') return 'same:' + c.v;
+  return c.type;
+}
+function condFromKey(key) {
+  const [type, v] = key.split(':');
+  const c = { type };
+  if (type === 'theyLast' || type === 'meLast') c.m = v;
+  else if (type === 'score') c.s = v;
+  else if (type === 'outcome') c.o = v;
+  else if (type === 'same') c.v = v;
+  return fixCond(c);
+}
+
+/* ======================= canvas tapes ======================= */
+let COL = {};
+function readColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const g = n => cs.getPropertyValue(n).trim();
+  COL = { coop: g('--coop'), defect: g('--defect'), empty: g('--empty'), ink: g('--ink'), ink3: g('--ink-3'), line: g('--line'), surface: g('--surface') };
+}
+function prepCanvas(cv, w, hh) {
+  const dpr = Math.min(3, window.devicePixelRatio || 1);
+  const W = Math.max(1, Math.round(w * dpr)), H = Math.max(1, Math.round(hh * dpr));
+  if (cv.width !== W) cv.width = W;
+  if (cv.height !== H) cv.height = H;
+  cv.style.width = w + 'px';
+  cv.style.height = hh + 'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, hh);
+  return ctx;
+}
+function cellPath(ctx, x, y, w, hh, r) {
+  ctx.beginPath();
+  if (r > 0 && ctx.roundRect) ctx.roundRect(x, y, w, hh, r); else ctx.rect(x, y, w, hh);
+}
+function tapeLabel(moves) { let d = 0; for (const m of moves) d += m; return `${moves.length - d} cooperations and ${d} defections`; }
+const tapeSet = new Set();
+const tapeRO = new ResizeObserver(entries => { for (const e of entries) { const t = e.target.__tape; if (t) t.draw(); } });
+function tape(host, moves, opts) {
+  opts = opts || {};
+  const cv = h('canvas', { role: 'img', 'aria-label': opts.label || tapeLabel(moves) });
+  host.replaceChildren(cv);
+  const t = {
+    host, cv, moves,
+    draw() {
+      if (!host.isConnected) { tapeRO.unobserve(host); tapeSet.delete(t); return; }
+      const avail = host.clientWidth;
+      if (!avail) return;
+      const count = opts.count || t.moves.length, gap = 2;
+      let cell = Math.floor((avail - (count - 1) * gap) / count);
+      cell = Math.max(3, Math.min(opts.maxCell || 14, cell));
+      const ctx = prepCanvas(cv, count * cell + (count - 1) * gap, cell);
+      const r = cell >= 9 ? 2.5 : cell >= 6 ? 1.5 : 0;
+      for (let i = 0; i < count; i++) {
+        const v = i < t.moves.length ? t.moves[i] : -1;
+        ctx.fillStyle = v === 1 ? COL.defect : v === 0 ? COL.coop : COL.empty;
+        cellPath(ctx, i * (cell + gap), 0, cell, cell, r);
+        ctx.fill();
+      }
+    },
+  };
+  host.__tape = t;
+  tapeSet.add(t);
+  tapeRO.observe(host);
+  return t;
+}
+function ltape(host, rows, opts) {
+  host.replaceChildren();
+  host.classList.add('ltape');
+  rows.forEach(([label, moves]) => {
+    const tHost = h('div', { class: 'tape-host' });
+    host.append(h('span', { class: 'ltape-label', title: label }, label), tHost);
+    tape(tHost, moves, Object.assign({ label: `${label}: ${tapeLabel(moves)}` }, opts));
+  });
+}
+
+/* ======================= tooltip & toast ======================= */
+const tip = () => $('#tip');
+function showTip(x, y, lines) {
+  const el = tip();
+  el.replaceChildren(...lines.map((l, i) => h('div', { class: i === 0 ? 'tip-title' : 'tip-line' }, l)));
+  el.hidden = false;
+  const r = el.getBoundingClientRect();
+  let left = x + 14, top = y + 16;
+  if (left + r.width > window.innerWidth - 8) left = x - r.width - 14;
+  if (top + r.height > window.innerHeight - 8) top = y - r.height - 14;
+  el.style.left = Math.max(8, left) + 'px';
+  el.style.top = Math.max(8, top) + 'px';
+}
+function hideTip() { const el = tip(); if (el) el.hidden = true; }
+let toastTimer = 0;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.hidden = false;
+  t.classList.remove('show');
+  void t.offsetWidth;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.classList.remove('show'); setTimeout(() => { t.hidden = true; }, 250); }, 3600);
+}
+
+/* ======================= layers (drawer, modals) ======================= */
+const layers = [];
+function openLayer(id, focusSel) {
+  const el = $('#' + id);
+  if (!el.hidden) return;
+  el.hidden = false;
+  layers.push({ id, opener: document.activeElement });
+  document.body.style.overflow = 'hidden';
+  hideTip();
+  const f = focusSel ? $(focusSel) : el.querySelector('button, input, select, textarea');
+  if (f) setTimeout(() => f.focus(), 40);
+}
+function closeLayer(id) {
+  const el = $('#' + id);
+  if (el.hidden) return;
+  el.hidden = true;
+  const k = layers.findIndex(l => l.id === id);
+  const l = k >= 0 ? layers.splice(k, 1)[0] : null;
+  if (!layers.length) document.body.style.overflow = '';
+  if (l && l.opener && l.opener.isConnected && l.opener.focus) l.opener.focus({ preventScroll: true });
+}
+
+/* ======================= tabs ======================= */
+const state = { tab: 'play' };
+function showTab(name, opts) {
+  opts = opts || {};
+  if (!TABS.includes(name)) name = 'play';
+  const changed = state.tab !== name;
+  state.tab = name;
+  TABS.forEach(t => {
+    const on = t === name, tab = $('#tab-' + t);
+    tab.setAttribute('aria-selected', String(on));
+    tab.tabIndex = on ? 0 : -1;
+    $('#view-' + t).hidden = !on;
+  });
+  if (!opts.noHash) { try { history.replaceState(null, '', '#' + name); } catch (e) { /* sandboxed frame */ } }
+  if (changed && !opts.keepScroll) window.scrollTo(0, 0);
+  hideTip();
+  onShow(name);
+}
+function onShow(name) {
+  if (name === 'match') {
+    if (!h2h.match) h2hStart();
+    else { drawMatchTape(); drawRace(); }
+  } else if (name === 'tournament') {
+    if (!tour.result || tour.sig !== tourSig()) runTour();
+  } else if (name === 'evolution') {
+    if (!evo.result || evo.sig !== evoSig()) runEvo(true);
+    else { renderEvoChart(false); renderReadout(evo.result.H.length - 1); }
+  }
+}
+
+/* ======================= the game (duel) ======================= */
+const duel = { n: 10, you: [], them: [], youScore: 0, themScore: 0, oppId: null, last: null, ctx: null, s: null };
+function duelNew() {
+  const pool = DUEL_POOL.filter(id => id !== duel.last);
+  duel.oppId = pool[Math.floor(Math.random() * pool.length)];
+  duel.last = duel.oppId;
+  duel.you = []; duel.them = []; duel.youScore = 0; duel.themScore = 0;
+  duel.s = compiled(byId(duel.oppId));
+  duel.ctx = { t: 0, me: new Uint8Array(duel.n), op: new Uint8Array(duel.n), myD: 0, opD: 0, myScore: 0, opScore: 0, rng: mulberry32((Math.random() * 4294967296) >>> 0) };
+  $('#duel-end').hidden = true;
+  $('#duel-msg').textContent = 'Make your first move.';
+  $$('.pt-cell').forEach(c => c.classList.remove('is-last'));
+  renderDuel(-1);
+}
+function duelPlay(move) {
+  const t = duel.you.length;
+  if (t >= duel.n) return;
+  const x = duel.ctx;
+  x.t = t;
+  const theirs = duel.s.decide(x), mine = move === 'D' ? 1 : 0;
+  x.me[t] = theirs; x.op[t] = mine;
+  const pYou = PAY[mine][theirs], pThem = PAY[theirs][mine];
+  x.myScore += pThem; x.opScore += pYou;
+  if (theirs) x.myD++;
+  if (mine) x.opD++;
+  duel.you.push(mine); duel.them.push(theirs);
+  duel.youScore += pYou; duel.themScore += pThem;
+  const key = (mine ? 'D' : 'C') + (theirs ? 'D' : 'C');
+  $$('.pt-cell').forEach(c => c.classList.toggle('is-last', c.dataset.o === key));
+  const msg = {
+    CC: 'You both cooperated. 3 points each.',
+    CD: 'You cooperated, but they defected. You get 0, they get 5.',
+    DC: 'You defected while they cooperated. You get 5, they get 0.',
+    DD: 'You both defected. 1 point each.',
+  }[key];
+  $('#duel-msg').textContent = `Round ${t + 1}: ${msg}`;
+  renderDuel(t);
+  if (duel.you.length === duel.n) duelEnd();
+}
+function renderDuel(justPlayed) {
+  const t = duel.you.length;
+  $('#duel-round').textContent = t >= duel.n ? 'All 10 rounds played' : `Round ${t + 1} of ${duel.n}`;
+  $('#duel-you').textContent = duel.youScore;
+  $('#duel-them').textContent = duel.themScore;
+  [['#cells-you', duel.you], ['#cells-them', duel.them]].forEach(([sel, arr]) => {
+    const host = $(sel);
+    if (host.children.length !== duel.n) {
+      host.replaceChildren();
+      for (let i = 0; i < duel.n; i++) host.append(h('span', { class: 'dcell' }));
+    }
+    Array.from(host.children).forEach((cell, i) => {
+      const v = i < arr.length ? arr[i] : -1;
+      cell.className = 'dcell' + (v === 0 ? ' c' : v === 1 ? ' d' : i === t ? ' next' : '') + (i === justPlayed ? ' pop' : '');
+      cell.textContent = v === 0 ? 'C' : v === 1 ? 'D' : '';
+    });
+  });
+  const over = t >= duel.n;
+  $('#btn-coop').disabled = over;
+  $('#btn-defect').disabled = over;
+}
+function duelEnd() {
+  const s = byId(duel.oppId), y = duel.youScore, th = duel.themScore;
+  $('#duel-verdict').textContent = y > th ? `You won, ${y} to ${th}.` : y < th ? `They won, ${th} to ${y}.` : `A tie, ${y} points each.`;
+  $('#duel-reveal').replaceChildren('You were playing ', bold(s.name), '. ', s.blurb, ` Together you scored ${y + th} points. Two players who cooperate every round score 60 between them.`);
+  $('#duel-end').hidden = false;
+  const b = $('#duel-end .btn-primary');
+  if (b) b.focus({ preventScroll: true });
+}
+function renderTraitDemos() {
+  const run = (a, b) => playMatch(compiled(byId(a)), compiled(byId(b)), 12, 0, mulberry32(3));
+  const nice = run('tft', 'tft'), ret = run('tft', 'alld'), clr = run('detective', 'tft');
+  const fg = vsScript(byId('tft'), 'CCCDCCCCCCCC', 3);
+  const demos = {
+    nice: [['Tit for Tat', nice.a], ['Tit for Tat', nice.b]],
+    retaliate: [['Tit for Tat', ret.a], ['Always Defect', ret.b]],
+    forgive: [['One-time defector', fg.theirs], ['Tit for Tat', fg.mine]],
+    clear: [['Detective', clr.a], ['Tit for Tat', clr.b]],
+  };
+  $$('[data-demo]').forEach(el => ltape(el, demos[el.dataset.demo], { count: 12, maxCell: 16 }));
+}
+
+/* ======================= strategy cards ======================= */
+function movesChips(opening) {
+  return h('span', { class: 'mini-moves' }, opening.map(m => h('span', { class: 'mm mm-' + (m === '?' ? 'r' : m.toLowerCase()), title: moveWord(m) }, m)));
+}
+function programList(s) {
+  const d = sanitize(s);
+  const ul = h('ul', { class: 'prog', 'aria-label': 'Rules' });
+  ul.append(h('li', null, h('span', { class: 'prog-k' }, d.opening.length > 1 ? 'Opens with' : 'First move'), movesChips(d.opening)));
+  d.rules.forEach(r => ul.append(h('li', null, h('span', { class: 'prog-k' }, 'If'), r.when.map(condText).join(' and '), ', ', bold(actText(r.then)))));
+  ul.append(h('li', null, h('span', { class: 'prog-k' }, d.rules.length ? 'Otherwise' : 'Then'), bold(actText(d.otherwise))));
+  return ul;
+}
+function niceBadge(nice) {
+  return h('span', { class: 'badge' }, h('i', { class: nice ? 'n' : 'x' }), nice ? 'Never defects first' : 'Defects first');
+}
+function lineupSwitch(s) {
+  const id = 'inc-' + s.id;
+  const input = h('input', { type: 'checkbox', id, role: 'switch' });
+  input.checked = store.lineup.has(s.id);
+  input.addEventListener('change', () => { if (!setInLineup(s.id, input.checked)) input.checked = true; });
+  return h('label', { class: 'switch', for: id }, input, h('span', { class: 'switch-track', 'aria-hidden': 'true' }), 'In lineup');
+}
+function strategyCard(s) {
+  const m = meta(s);
+  const card = h('article', { class: 'card' + (store.lineup.has(s.id) ? '' : ' is-out'), 'data-id': s.id });
+  card.append(h('div', { class: 'card-head' }, h('h4', { class: 'card-title' }, s.name), lineupSwitch(s)));
+  card.append(h('div', { class: 'badges' }, niceBadge(m.nice), m.chance ? h('span', { class: 'badge' }, h('i', { class: 'r' }), 'Uses chance') : null));
+  if (s.blurb) card.append(h('p', { class: 'card-blurb' }, s.blurb));
+  card.append(programList(s));
+  const fp = h('div', { class: 'ltape' });
+  card.append(fp);
+  ltape(fp, [['Tester', m.finger.theirs], ['Reply', m.finger.mine]], { maxCell: 12 });
+  if (s.note) card.append(h('p', { class: 'card-note' }, s.note));
+  const row = h('div', { class: 'card-actions' });
+  row.append(h('button', { class: 'btn btn-sm', type: 'button', onclick: () => watchPair(s.id, s.id === 'tft' ? 'joss' : 'tft') }, 'Watch a match'));
+  row.append(h('button', { class: 'btn btn-sm', type: 'button', onclick: () => openBuilder(s) }, s.custom ? 'Edit' : 'Copy and edit'));
+  if (s.custom) {
+    row.append(h('button', { class: 'btn btn-sm', type: 'button', onclick: () => copyShare(sanitize(s)) }, 'Share'));
+    row.append(h('button', { class: 'btn btn-sm btn-danger', type: 'button', onclick: () => confirmDelete(s, row) }, 'Delete'));
+  }
+  card.append(row);
+  return card;
+}
+function confirmDelete(s, row) {
+  const keep = h('button', { class: 'btn btn-sm', type: 'button' }, 'Keep it');
+  const box = h('div', { class: 'card-confirm', role: 'group', 'aria-label': 'Confirm delete' },
+    h('span', null, `Delete ${s.name}? This can’t be undone.`),
+    h('button', { class: 'btn btn-sm btn-danger', type: 'button', onclick: () => deleteStrategy(s.id) }, 'Delete'),
+    keep);
+  keep.addEventListener('click', () => { box.replaceWith(row); const d = row.querySelector('.btn-danger'); if (d) d.focus(); });
+  row.replaceWith(box);
+  keep.focus();
+}
+function deleteStrategy(id) {
+  const s = byId(id);
+  store.customs = store.customs.filter(c => c.id !== id);
+  store.lineup.delete(id);
+  if (store.lineup.size < 2) CLASSIC.forEach(x => store.lineup.add(x));
+  if (h2h.a === id) h2h.a = 'tft';
+  if (h2h.b === id) h2h.b = 'joss';
+  if (h2h.match && (h2h.match.A.id === id || h2h.match.B.id === id)) h2h.match = null;
+  persist();
+  refreshStrategyUI();
+  toast(`Deleted ${s ? s.name : 'the strategy'}.`);
+}
+function renderStrategies() {
+  const yours = $('#cards-yours'), classic = $('#cards-classic');
+  yours.replaceChildren();
+  classic.replaceChildren();
+  if (store.customs.length) store.customs.forEach(s => yours.append(strategyCard(s)));
+  else {
+    yours.append(h('div', { class: 'empty-card' },
+      h('h4', { class: 'card-title' }, 'Build your own'),
+      h('p', null, 'Start from a blank strategy, or press Copy and edit on any classic and change a rule. Your strategies join the tournament lineup as soon as you save them.'),
+      h('div', null, h('button', { class: 'btn btn-primary btn-sm', type: 'button', 'data-action': 'new-strategy', html: ICON.plus + 'Build a strategy' }))));
+  }
+  BUILTINS.forEach(s => classic.append(strategyCard(s)));
+}
+function setInLineup(id, on) {
+  if (!on && store.lineup.has(id) && store.lineup.size <= 2) { toast('The lineup needs at least two strategies.'); return false; }
+  if (on) store.lineup.add(id); else store.lineup.delete(id);
+  persist();
+  syncCards();
+  renderLineupChips();
+  updatePresetState();
+  updateEvoNote();
+  lineupChanged();
+  return true;
+}
+function syncCards() {
+  $$('.card[data-id]').forEach(card => {
+    const on = store.lineup.has(card.dataset.id);
+    card.classList.toggle('is-out', !on);
+    const inp = card.querySelector('input[role="switch"]');
+    if (inp) inp.checked = on;
+  });
+}
+const lineupChanged = debounce(() => {
+  if (state.tab === 'tournament') runTour();
+  else if (state.tab === 'evolution') runEvo(true);
+}, 280);
+function refreshStrategyUI() {
+  renderStrategies();
+  renderLineupChips();
+  fillSelects();
+  updatePresetState();
+  updateEvoNote();
+  if (state.tab === 'tournament') runTour();
+  else if (state.tab === 'evolution') runEvo(true);
+  else if (state.tab === 'match' && !h2h.match) h2hStart();
+}
+
+/* ======================= head to head ======================= */
+const h2h = { a: 'tft', b: 'joss', rounds: 200, noise: 0, seed: 1, speed: 'normal', shown: 0, playing: false, match: null, raf: 0, hover: -1, layout: null, cv: null, last: 0, acc: 0 };
+function fillSelects() {
+  [['#h2h-a', 'a'], ['#h2h-b', 'b']].forEach(([sel, k]) => {
+    const el = $(sel);
+    el.replaceChildren();
+    if (store.customs.length) el.append(h('optgroup', { label: 'Yours' }, store.customs.map(s => h('option', { value: s.id }, s.name))));
+    el.append(h('optgroup', { label: 'Classics' }, BUILTINS.map(s => h('option', { value: s.id }, s.name))));
+    if (!byId(h2h[k])) h2h[k] = k === 'a' ? 'tft' : 'joss';
+    el.value = h2h[k];
+  });
+}
+function syncH2hControls() {
+  fillSelects();
+  $('#h2h-rounds').value = String(h2h.rounds);
+  $('#h2h-noise').value = String(h2h.noise);
+  $('#h2h-noise-out').textContent = h2h.noise + '%';
+}
+function displayNames() {
+  const m = h2h.match;
+  if (m.A.id === m.B.id || m.A.name === m.B.name) return [m.A.name + ' (top)', m.B.name + ' (bottom)'];
+  return [m.A.name, m.B.name];
+}
+function h2hCompute() {
+  const A = byId(h2h.a), B = byId(h2h.b);
+  const m = playMatch(compiled(A), compiled(B), h2h.rounds, h2h.noise / 100, mulberry32(hashSeed(h2h.seed, 7)));
+  const N = m.rounds;
+  m.cumA = new Float64Array(N + 1);
+  m.cumB = new Float64Array(N + 1);
+  m.oc = [0, 1, 2, 3].map(() => new Int32Array(N + 1));
+  for (let t = 0; t < N; t++) {
+    m.cumA[t + 1] = m.cumA[t] + PAY[m.a[t]][m.b[t]];
+    m.cumB[t + 1] = m.cumB[t] + PAY[m.b[t]][m.a[t]];
+    const k = m.a[t] * 2 + m.b[t];
+    for (let q = 0; q < 4; q++) m.oc[q][t + 1] = m.oc[q][t] + (q === k ? 1 : 0);
+  }
+  m.A = A; m.B = B;
+  h2h.match = m;
+  h2h.random = compiled(A).random || compiled(B).random || h2h.noise > 0;
+}
+function h2hStart(opts) {
+  opts = opts || {};
+  cancelAnimationFrame(h2h.raf);
+  h2hCompute();
+  const [na, nb] = displayNames();
+  $('#sb-a-name').textContent = na;
+  $('#sb-b-name').textContent = nb;
+  $('#lg-a').textContent = na;
+  $('#lg-b').textContent = nb;
+  $('#pb-dice').disabled = !h2h.random;
+  renderRaceLegend();
+  buildMix();
+  h2hPlayFrom(0, opts.instant);
+}
+function h2hPlayFrom(start, instant) {
+  cancelAnimationFrame(h2h.raf);
+  const m = h2h.match;
+  $('#match-story').replaceChildren();
+  $('#match-pending').hidden = false;
+  h2h.hover = -1;
+  if (instant || reduced.matches) {
+    h2h.shown = m.rounds; h2h.playing = false;
+    h2hFrame(); h2hDone();
+  } else {
+    h2h.shown = start; h2h.playing = true;
+    h2hFrame();
+    h2h.last = performance.now(); h2h.acc = 0;
+    h2h.raf = requestAnimationFrame(h2hTick);
+  }
+  updatePlayBtn();
+}
+function h2hTick(now) {
+  if (!h2h.playing) return;
+  const dt = Math.min(100, now - h2h.last);
+  h2h.last = now;
+  h2h.acc += dt * SPEEDS[h2h.speed] / 1000;
+  const step = Math.floor(h2h.acc);
+  if (step > 0) {
+    h2h.acc -= step;
+    h2h.shown = Math.min(h2h.match.rounds, h2h.shown + step);
+    h2hFrame();
+  }
+  if (h2h.shown >= h2h.match.rounds) { h2h.playing = false; h2hDone(); return; }
+  h2h.raf = requestAnimationFrame(h2hTick);
+}
+function h2hFrame() {
+  const m = h2h.match, s = h2h.shown;
+  $('#sb-a-score').textContent = fmtInt(m.cumA[s]);
+  $('#sb-b-score').textContent = fmtInt(m.cumB[s]);
+  $('#sb-a-avg').textContent = s ? `${fmt2(m.cumA[s] / s)} per round` : ' ';
+  $('#sb-b-avg').textContent = s ? `${fmt2(m.cumB[s] / s)} per round` : ' ';
+  $('#sb-round').textContent = `Round ${s} of ${m.rounds}`;
+  drawMatchTape();
+  updateMix();
+  drawRace();
+}
+function h2hDone() {
+  const [na, nb] = displayNames();
+  $('#match-story').replaceChildren(...matchStory(h2h.match, na, nb).map(t => h('li', null, t)));
+  $('#match-pending').hidden = true;
+  updatePlayBtn();
+}
+function updatePlayBtn() {
+  const b = $('#pb-play'), m = h2h.match;
+  const done = !!m && h2h.shown >= m.rounds;
+  b.innerHTML = (h2h.playing ? ICON.pause : done ? ICON.replay : ICON.play) + (h2h.playing ? 'Pause' : done ? 'Replay' : 'Play');
+  $('#pb-end').disabled = done;
+}
+function drawMatchTape() {
+  const host = $('#match-tape'), m = h2h.match;
+  if (!m || !host.clientWidth) return;
+  if (!h2h.cv || !host.contains(h2h.cv)) {
+    h2h.cv = h('canvas', { role: 'img' });
+    host.replaceChildren(h2h.cv);
+    bindTapeHover(h2h.cv);
+  }
+  const W = host.clientWidth, N = m.rounds;
+  const perLine = W >= 900 ? 50 : W >= 640 ? 40 : W >= 440 ? 25 : 20;
+  const labelW = 36, gap = 2, rowGap = 2, lineGap = 12;
+  const cell = Math.max(3, Math.min(18, Math.floor((W - labelW - (perLine - 1) * gap) / perLine)));
+  const lines = Math.ceil(N / perLine), lineH = cell * 2 + rowGap;
+  const width = labelW + perLine * cell + (perLine - 1) * gap, height = lines * lineH + (lines - 1) * lineGap;
+  const ctx = prepCanvas(h2h.cv, width, height);
+  ctx.font = '600 11px ' + FONT;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'right';
+  const r = cell >= 9 ? 2.5 : 1.5;
+  for (let L = 0; L < lines; L++) {
+    const y0 = L * (lineH + lineGap);
+    ctx.fillStyle = COL.ink3;
+    ctx.fillText(String(L * perLine + 1), labelW - 10, y0 + lineH / 2 + 0.5);
+    for (let c = 0; c < perLine; c++) {
+      const t = L * perLine + c;
+      if (t >= N) break;
+      const x = labelW + c * (cell + gap), on = t < h2h.shown;
+      ctx.fillStyle = on ? (m.a[t] ? COL.defect : COL.coop) : COL.empty;
+      cellPath(ctx, x, y0, cell, cell, r); ctx.fill();
+      ctx.fillStyle = on ? (m.b[t] ? COL.defect : COL.coop) : COL.empty;
+      cellPath(ctx, x, y0 + cell + rowGap, cell, cell, r); ctx.fill();
+    }
+  }
+  const hv = h2h.hover;
+  if (hv >= 0 && hv < N) {
+    const L = Math.floor(hv / perLine), c = hv % perLine;
+    const x = labelW + c * (cell + gap), y0 = L * (lineH + lineGap);
+    ctx.strokeStyle = COL.ink;
+    ctx.lineWidth = 1.5;
+    cellPath(ctx, x - 2, y0 - 2, cell + 4, lineH + 4, r + 1.5);
+    ctx.stroke();
+  }
+  h2h.layout = { perLine, labelW, gap, cell, lineH, lineGap, lines };
+  const s = h2h.shown;
+  h2h.cv.setAttribute('aria-label', `Moves in rounds 1 to ${s}. ${m.A.name}: ${tapeLabel(m.a.subarray(0, s))}. ${m.B.name}: ${tapeLabel(m.b.subarray(0, s))}.`);
+}
+function bindTapeHover(cv) {
+  cv.addEventListener('pointermove', e => {
+    const L = h2h.layout;
+    if (!L || !h2h.match) return;
+    const rect = cv.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const line = Math.floor(y / (L.lineH + L.lineGap));
+    const col = Math.floor((x - L.labelW + L.gap / 2) / (L.cell + L.gap));
+    const within = y - line * (L.lineH + L.lineGap) <= L.lineH + 1;
+    const t = line * L.perLine + col;
+    const ok = within && col >= 0 && col < L.perLine && line >= 0 && line < L.lines && t < h2h.match.rounds;
+    setH2hHover(ok ? t : -1, e.clientX, e.clientY);
+  });
+  cv.addEventListener('pointerleave', () => setH2hHover(-1));
+}
+function setH2hHover(t, cx, cy) {
+  if (t !== h2h.hover) { h2h.hover = t; drawMatchTape(); drawRace(); }
+  const m = h2h.match;
+  if (t >= 0 && m && t < h2h.shown) {
+    const [na, nb] = displayNames(), ma = m.a[t], mb = m.b[t];
+    const pts = v => `${v} ${v === 1 ? 'point' : 'points'}`;
+    showTip(cx, cy, [
+      `Round ${t + 1}`,
+      `${na} ${ma ? 'defected' : 'cooperated'}: ${pts(PAY[ma][mb])}`,
+      `${nb} ${mb ? 'defected' : 'cooperated'}: ${pts(PAY[mb][ma])}`,
+      `Running score ${fmtInt(m.cumA[t + 1])} to ${fmtInt(m.cumB[t + 1])}`,
+    ]);
+  } else hideTip();
+}
+const MIX_ROWS = [{ q: 0, a: 0, b: 0 }, { q: 1, a: 0, b: 1 }, { q: 2, a: 1, b: 0 }, { q: 3, a: 1, b: 1 }];
+function buildMix() {
+  const [na, nb] = displayNames();
+  const labels = ['Both cooperated', `${nb} exploited ${na}`, `${na} exploited ${nb}`, 'Both defected'];
+  const host = $('#match-mix');
+  host.replaceChildren(...MIX_ROWS.map(r => h('div', { class: 'mix-row' },
+    h('span', null, labels[r.q]),
+    h('span', { class: 'mix-track' }, h('span', { class: 'mix-fill', 'data-q': r.q, style: 'width:0%' },
+      h('span', { style: `background:var(${r.a ? '--defect' : '--coop'})` }),
+      h('span', { style: `background:var(${r.b ? '--defect' : '--coop'})` }))),
+    h('span', { class: 'mix-n', 'data-n': r.q }, '0'))));
+}
+function updateMix() {
+  const m = h2h.match, s = h2h.shown, host = $('#match-mix');
+  MIX_ROWS.forEach(r => {
+    const n = m.oc[r.q][s];
+    const f = host.querySelector(`[data-q="${r.q}"]`), t = host.querySelector(`[data-n="${r.q}"]`);
+    if (f) { f.style.width = s ? pct(n / s, 1) : '0%'; f.style.minWidth = n ? '2px' : '0'; }
+    if (t) t.textContent = fmtInt(n);
+  });
+}
+function renderRaceLegend() {
+  const [na, nb] = displayNames();
+  $('#race-legend').replaceChildren(
+    h('span', null, h('i', { class: 'key-line', style: 'background:var(--ink)' }), na),
+    h('span', null, h('i', { class: 'key-line', style: 'background:var(--ink-3)' }), nb),
+    h('span', null, h('i', { class: 'key-line', style: 'background:var(--line-strong)' }), 'Both cooperating every round'));
+}
+function drawRace() {
+  const host = $('#match-race'), m = h2h.match;
+  if (!m || !host.clientWidth) return;
+  const W = host.clientWidth, H = W < 520 ? 190 : 230;
+  const pad = { l: 44, r: 14, t: 12, b: 26 };
+  const N = m.rounds, s = h2h.shown;
+  const maxV = niceCeil(Math.max(m.cumA[N], m.cumB[N], 3 * N), 4);
+  const pw = W - pad.l - pad.r, ph = H - pad.t - pad.b;
+  const X = t => pad.l + (t / N) * pw, Y = v => pad.t + (1 - v / maxV) * ph;
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', 'aria-label': `Running score after ${s} rounds: ${m.A.name} ${fmtInt(m.cumA[s])}, ${m.B.name} ${fmtInt(m.cumB[s])}.` });
+  const ax = svgEl('g', { class: 'ax' });
+  niceTicks(maxV, 4).forEach(v => {
+    ax.append(svgEl('line', { x1: pad.l, x2: pad.l + pw, y1: Y(v) + 0.5, y2: Y(v) + 0.5, class: v === 0 ? 'base' : '' }));
+    const tx = svgEl('text', { x: pad.l - 8, y: Y(v) + 4, 'text-anchor': 'end' });
+    tx.textContent = fmtInt(v);
+    ax.append(tx);
+  });
+  niceTicks(N, 4).forEach(v => {
+    const tx = svgEl('text', { x: X(v), y: H - 6, 'text-anchor': v === 0 ? 'start' : v >= N ? 'end' : 'middle' });
+    tx.textContent = v === 0 && W >= 520 ? 'Round 0' : fmtInt(v);
+    ax.append(tx);
+  });
+  svg.append(ax);
+  svg.append(svgEl('line', { x1: X(0), y1: Y(0), x2: X(N), y2: Y(3 * N), style: 'stroke:var(--line-strong);stroke-width:1.5' }));
+  const step = Math.max(1, Math.floor(N / 400));
+  const path = (cum, color) => {
+    let d = '';
+    for (let t = 0; t <= s; t += step) d += (t ? 'L' : 'M') + X(t).toFixed(1) + ' ' + Y(cum[t]).toFixed(1);
+    if (s % step) d += 'L' + X(s).toFixed(1) + ' ' + Y(cum[s]).toFixed(1);
+    return svgEl('path', { d, style: `fill:none;stroke:${color};stroke-width:2;stroke-linejoin:round;stroke-linecap:round` });
+  };
+  if (s > 0) {
+    svg.append(path(m.cumB, 'var(--ink-3)'), path(m.cumA, 'var(--ink)'));
+    svg.append(svgEl('circle', { cx: X(s), cy: Y(m.cumB[s]), r: 4, style: 'fill:var(--ink-3);stroke:var(--surface);stroke-width:2' }));
+    svg.append(svgEl('circle', { cx: X(s), cy: Y(m.cumA[s]), r: 4, style: 'fill:var(--ink);stroke:var(--surface);stroke-width:2' }));
+  }
+  if (h2h.hover >= 0 && h2h.hover < s) {
+    const x = X(h2h.hover + 1);
+    svg.append(svgEl('line', { x1: x, x2: x, y1: pad.t, y2: pad.t + ph, style: 'stroke:var(--ink);stroke-width:1' }));
+  }
+  const hit = svgEl('rect', { x: pad.l, y: pad.t, width: pw, height: ph, fill: 'transparent', style: 'cursor:crosshair' });
+  hit.addEventListener('pointermove', e => {
+    const r = svg.getBoundingClientRect();
+    const sx = (e.clientX - r.left) * (W / r.width);
+    const t = Math.round((sx - pad.l) / pw * N);
+    setH2hHover(Math.max(0, Math.min(N - 1, t - 1)), e.clientX, e.clientY);
+  });
+  hit.addEventListener('pointerleave', () => setH2hHover(-1));
+  svg.append(hit);
+  host.replaceChildren(svg);
+}
+function matchStory(m, na, nb) {
+  const a = m.a, b = m.b, N = m.rounds, out = [];
+  const first = arr => { for (let i = 0; i < N; i++) if (arr[i]) return i; return -1; };
+  const fa = first(a), fb = first(b);
+  const cd = m.counts[1], dc = m.counts[2];
+  if (fa < 0 && fb < 0) {
+    out.push(`Neither side ever defected. They cooperated for all ${fmtInt(N)} rounds and each scored ${fmtInt(3 * N)}, the best result two players can reach together.`);
+    return out;
+  }
+  if (fa >= 0 && (fb < 0 || fa < fb)) out.push(`${na} defected first, in round ${fa + 1}.`);
+  else if (fb >= 0 && (fa < 0 || fb < fa)) out.push(`${nb} defected first, in round ${fb + 1}.`);
+  else out.push(`Both defected for the first time in round ${fa + 1}.`);
+  if (fa < 0) out.push(`${na} never defected at all.`);
+  if (fb < 0) out.push(`${nb} never defected at all.`);
+  let best = { len: 0, start: 0 }, cur = 0, start = 0;
+  for (let t = 0; t < N; t++) {
+    if (a[t] !== b[t]) {
+      if (cur > 0 && a[t] !== a[t - 1]) cur++; else { cur = 1; start = t; }
+      if (cur > best.len) best = { len: cur, start };
+    } else cur = 0;
+  }
+  if (best.len >= 6) out.push(`From round ${best.start + 1} they fell into an echo for ${best.len} rounds: each punished the other’s last move, so they took turns exploiting each other.`);
+  let bd = { len: 0, start: 0 };
+  cur = 0;
+  for (let t = 0; t < N; t++) {
+    if (a[t] && b[t]) { if (!cur) start = t; cur++; if (cur > bd.len) bd = { len: cur, start }; } else cur = 0;
+  }
+  if (bd.len >= 10) out.push(bd.start + bd.len === N ? `From round ${bd.start + 1} to the end, both defected every round.` : `They spent ${bd.len} rounds in a row both defecting, starting in round ${bd.start + 1}.`);
+  let tail = 0;
+  for (let t = N - 1; t >= 0 && !a[t] && !b[t]; t--) tail++;
+  const firstD = Math.min(fa < 0 ? N : fa, fb < 0 ? N : fb);
+  if (tail >= 10 && N - tail > firstD) out.push(`They were back to cooperating for the last ${tail} rounds.`);
+  if (dc >= N * 0.25) out.push(`${na} exploited ${nb} in ${dc} of ${N} rounds.`);
+  if (cd >= N * 0.25) out.push(`${nb} exploited ${na} in ${cd} of ${N} rounds.`);
+  const sa = m.scoreA, sb = m.scoreB, diff = Math.abs(sa - sb);
+  out.push(sa === sb ? `The match ended in a tie, ${fmtInt(sa)} points each.` : `${sa > sb ? na : nb} won the match by ${fmtInt(diff)} ${diff === 1 ? 'point' : 'points'}.`);
+  if (sa < 3 * N && sb < 3 * N) out.push(`Both scored less than the ${fmtInt(3 * N)} points each would have earned by cooperating every round.`);
+  return out;
+}
+function watchPair(a, b, fromTournament) {
+  h2h.a = a; h2h.b = b;
+  if (fromTournament) { h2h.rounds = tour.rounds; h2h.noise = tour.noise; }
+  h2h.match = null;
+  syncH2hControls();
+  showTab('match');
+}
+
+/* ======================= tournament ======================= */
+const tour = { rounds: 200, reps: 100, noise: 0, self: true, seed: 1, view: 'points', result: null, sig: '', token: 0 };
+const tourSig = () => JSON.stringify([lineupDefs().map(s => s.id + defKey(s)), tour.rounds, tour.reps, tour.noise, tour.self, tour.seed]);
+function runSliced(gen, onProgress, isCancelled) {
+  return new Promise(resolve => {
+    const step = () => {
+      if (isCancelled()) { resolve(null); return; }
+      const t0 = performance.now();
+      let r;
+      do { r = gen.next(); } while (!r.done && performance.now() - t0 < 14);
+      if (r.done) { resolve(r.value); return; }
+      onProgress(r.value);
+      setTimeout(step, 0);
+    };
+    step();
+  });
+}
+async function runTour() {
+  const defs = lineupDefs(), token = ++tour.token, summary = $('#t-summary');
+  tour.sig = tourSig();
+  if (defs.length < 2) {
+    tour.result = null;
+    summary.textContent = 'Add at least two strategies to the lineup to run a tournament.';
+    $('#t-insights').replaceChildren(); $('#t-board').replaceChildren(); $('#t-cross').replaceChildren(); $('#t-cross-legend').replaceChildren();
+    return;
+  }
+  const t0 = performance.now();
+  let bar = null;
+  const res = await runSliced(
+    tournamentSteps(defs, { rounds: tour.rounds, reps: tour.reps, noise: tour.noise / 100, selfPlay: tour.self, seed: hashSeed(tour.seed, 99) }),
+    p => {
+      if (!bar) { bar = h('span'); summary.replaceChildren(h('span', { class: 'progress' }, bar), 'Simulating matches…'); }
+      bar.style.width = pct(p);
+    },
+    () => token !== tour.token);
+  if (!res) return;
+  res.ms = performance.now() - t0;
+  res.defs = defs;
+  res.nice = defs.map(s => meta(s).nice);
+  res.order = defs.map((_, i) => i).sort((i, j) => (res.avg[j] - res.avg[i]) || (res.wins[j] - res.wins[i]));
+  tour.result = res;
+  const ms = res.ms;
+  summary.textContent = `${fmtInt(res.matches)} matches and ${fmtInt(res.moves)} moves, simulated in ${ms < 1000 ? Math.max(1, Math.round(ms)) + ' ms' : (ms / 1000).toFixed(1) + ' seconds'}.`;
+  renderInsights(res);
+  renderBoard(res, true);
+  renderCross(true);
+}
+function renderInsights(R) {
+  const n = R.defs.length, ord = R.order, items = [];
+  const w = ord[0], beat = R.wins[w];
+  items.push([bold(R.defs[w].name), ` won with ${fmt2(R.avg[w])} points per round. `,
+    beat === 0 ? 'It didn’t beat a single opponent head to head.' : `It beat ${beat} of its ${n - 1} opponents head to head.`]);
+  let mw = 0;
+  R.defs.forEach((_, i) => { if (R.wins[i] > R.wins[mw]) mw = i; });
+  if (mw !== w && R.wins[mw] > beat) {
+    const rank = ord.indexOf(mw) + 1;
+    items.push([bold(R.defs[mw].name), ` won the most matches (${R.wins[mw]} of ${n - 1}) and still finished ${rank === n ? 'last' : ordinal(rank)}.`]);
+  }
+  let k = 0;
+  while (k < n && R.nice[ord[k]]) k++;
+  if (k >= 3 && k < n) items.push([`The top ${k} places all went to strategies that never defect first.`]);
+  $('#t-insights').replaceChildren(...items.map(p => h('li', null, p)));
+}
+function renderBoard(R, animate) {
+  const host = $('#t-board');
+  host.replaceChildren(h('li', { class: 'brow bhead', 'aria-hidden': 'true' },
+    h('span', null, ''), h('span', null, 'Strategy'), h('span', null, 'Points per round'),
+    h('span', { class: 'bwdl' }, h('span', null, 'Won'), h('span', null, 'Drew'), h('span', null, 'Lost'))));
+  const max = Math.max.apply(null, R.avg) || 1;
+  const fills = [];
+  R.order.forEach((i, k) => {
+    const fill = h('span', { class: 'bfill ' + (R.nice[i] ? 'n' : 'x') });
+    const target = `calc((100% - 46px) * ${(R.avg[i] / max).toFixed(4)})`;
+    host.append(h('li', { class: 'brow' },
+      h('span', { class: 'brank' }, String(k + 1)),
+      h('span', { class: 'bname' }, R.defs[i].name),
+      h('span', { class: 'bbar' }, fill, h('span', { class: 'bval' }, fmt2(R.avg[i]))),
+      h('span', { class: 'bwdl', 'aria-label': `${R.wins[i]} won, ${R.draws[i]} drew, ${R.losses[i]} lost` },
+        h('span', null, R.wins[i]), h('span', null, R.draws[i]), h('span', null, R.losses[i]))));
+    if (animate && !reduced.matches) { fill.style.width = '0px'; fills.push([fill, target]); } else fill.style.width = target;
+  });
+  if (fills.length) requestAnimationFrame(() => requestAnimationFrame(() => fills.forEach(([f, t]) => { f.style.width = t; })));
+}
+function drawMini(cv, sample, K) {
+  const w = 36, hh = 22, gap = 2;
+  const ctx = prepCanvas(cv, w, hh);
+  const cw = w / K, rh = (hh - gap) / 2;
+  for (let t = 0; t < K && t < sample.mine.length; t++) {
+    ctx.fillStyle = sample.mine[t] ? COL.defect : COL.coop;
+    ctx.fillRect(t * cw, 0, cw + 0.4, rh);
+    ctx.fillStyle = sample.theirs[t] ? COL.defect : COL.coop;
+    ctx.fillRect(t * cw, rh + gap, cw + 0.4, rh);
+  }
+}
+function crossTipLines(i, j) {
+  const R = tour.result, A = R.defs[i], B = R.defs[j];
+  if (i === j) return [`${A.name} against a copy of itself`, `${fmt2(R.M[i][i])} points per round each`, 'Click to watch the match'];
+  return [`${A.name} vs ${B.name}`, `${A.name}: ${fmt2(R.M[i][j])} points per round`, `${B.name}: ${fmt2(R.M[j][i])} points per round`, 'Click to watch the match'];
+}
+function renderCross(animate) {
+  const R = tour.result;
+  if (!R) return;
+  const host = $('#t-cross'), ord = R.order, n = ord.length, K = 20;
+  host.replaceChildren();
+  host.style.setProperty('--n', n);
+  host.append(h('div', { class: 'xc-corner' }, 'Row against column'));
+  ord.forEach((i, k) => host.append(h('div', { class: 'xc-colhead', title: R.defs[i].name }, String(k + 1))));
+  ord.forEach((i, r) => {
+    host.append(h('div', { class: 'xc-rowhead' }, h('span', { class: 'xc-num' }, String(r + 1)), h('span', null, R.defs[i].name)));
+    ord.forEach((j, c) => {
+      const v = R.M[i][j];
+      const btn = h('button', { class: 'xc', type: 'button' });
+      if (v === null) {
+        btn.disabled = true;
+        btn.textContent = '–';
+        btn.setAttribute('aria-label', `${R.defs[i].name} does not play itself`);
+      } else {
+        btn.setAttribute('aria-label', crossTipLines(i, j).slice(0, -1).join('. '));
+        btn.addEventListener('click', () => watchPair(R.defs[i].id, R.defs[j].id, true));
+        btn.addEventListener('pointermove', e => showTip(e.clientX, e.clientY, crossTipLines(i, j)));
+        btn.addEventListener('pointerleave', hideTip);
+        btn.addEventListener('focus', () => { const b = btn.getBoundingClientRect(); showTip(b.right, b.bottom, crossTipLines(i, j)); });
+        btn.addEventListener('blur', hideTip);
+        if (tour.view === 'points') {
+          const f = Math.max(0, Math.min(1, v / 5));
+          btn.style.background = `color-mix(in oklab, var(--seq-hi) ${(f * 100).toFixed(1)}%, var(--seq-lo))`;
+          if (f > 0.5) btn.classList.add('hi');
+          btn.textContent = fmt2(v);
+        } else {
+          btn.classList.add('mv');
+          const cv = h('canvas', { 'aria-hidden': 'true' });
+          btn.append(cv);
+          drawMini(cv, R.sample[i][j], K);
+        }
+      }
+      if (animate && !reduced.matches) { btn.classList.add('xc-in'); btn.style.animationDelay = ((r + c) * 22) + 'ms'; }
+      host.append(btn);
+    });
+  });
+  renderCrossLegend();
+}
+function renderCrossLegend() {
+  const host = $('#t-cross-legend');
+  if (tour.view === 'points') {
+    host.replaceChildren(
+      h('div', { class: 'ramp-wrap', 'aria-hidden': 'true' }, h('div', { class: 'ramp' }),
+        h('div', { class: 'ramp-ticks' }, [0, 1, 3, 5].map(v => h('span', { style: `left:${v * 20}%` }, String(v))))),
+      h('span', null, 'Points per round earned by the row strategy. 3 means steady cooperation, 1 means steady defection.'));
+  } else {
+    host.replaceChildren(
+      h('span', { class: 'legend' }, h('span', null, h('i', { class: 'sw sw-c' }), 'Cooperate'), h('span', null, h('i', { class: 'sw sw-d' }), 'Defect')),
+      h('span', null, 'The first 20 rounds of each match. Top half of a cell: the row strategy. Bottom half: its opponent.'));
+  }
+}
+function presetIds(p) { return p.ids ? p.ids : BUILTINS.map(b => b.id); }
+function renderPresets() {
+  $('#presets').replaceChildren(...PRESETS.map(p => h('button', { type: 'button', 'aria-pressed': 'false', 'data-preset': p.id, onclick: () => applyPreset(p) }, p.label)));
+  updatePresetState();
+}
+function applyPreset(p) {
+  const customs = p.id === 'everyone' ? store.customs.map(c => c.id) : store.customs.filter(c => store.lineup.has(c.id)).map(c => c.id);
+  store.lineup = new Set(presetIds(p).concat(customs));
+  tour.noise = p.noise;
+  syncTourControls();
+  persist();
+  renderLineupChips();
+  syncCards();
+  updatePresetState();
+  updateEvoNote();
+  runTour();
+}
+function updatePresetState() {
+  const inBuilt = BUILTINS.filter(b => store.lineup.has(b.id)).map(b => b.id).sort().join(',');
+  $$('#presets [data-preset]').forEach(btn => {
+    const p = PRESETS.find(x => x.id === btn.dataset.preset);
+    const on = presetIds(p).slice().sort().join(',') === inBuilt && p.noise === tour.noise &&
+      (p.id !== 'everyone' || store.customs.every(c => store.lineup.has(c.id)));
+    btn.setAttribute('aria-pressed', String(on));
+  });
+}
+function renderLineupChips() {
+  $('#lineup-chips').replaceChildren(...all().map(s => h('button', {
+    type: 'button', class: 'chip', 'aria-pressed': String(store.lineup.has(s.id)),
+    onclick: () => setInLineup(s.id, !store.lineup.has(s.id)),
+  }, h('i', { class: meta(s).nice ? 'n' : 'x' }), s.name)));
+}
+function syncTourControls() {
+  $('#t-rounds').value = String(tour.rounds);
+  $('#t-reps').value = String(tour.reps);
+  $('#t-noise').value = String(tour.noise);
+  $('#t-noise-out').textContent = tour.noise + '%';
+  $('#t-self').checked = tour.self;
+}
+
+/* ======================= evolution ======================= */
+const evo = { gens: 50, noise: 0, start: 'equal', seed: 1, result: null, sig: '', token: 0, focus: -1, raf: 0 };
+const evoSig = () => JSON.stringify([lineupDefs().map(s => s.id + defKey(s)), evo.gens, evo.noise, evo.start, evo.seed]);
+function updateEvoNote() { $('#e-lineup-note').textContent = `Uses the ${store.lineup.size} strategies in your tournament lineup.`; }
+function startMix(nice) {
+  const n = nice.length, k = nice.filter(Boolean).length;
+  if (evo.start === 'equal' || k === 0 || k === n) return nice.map(() => 1 / n);
+  const share = evo.start === 'nice' ? 0.8 : 0.2;
+  return nice.map(v => (v ? share / k : (1 - share) / (n - k)));
+}
+async function runEvo(animate) {
+  const defs = lineupDefs(), token = ++evo.token;
+  evo.sig = evoSig();
+  updateEvoNote();
+  if (defs.length < 2) return;
+  const nice = defs.map(s => meta(s).nice);
+  const anyRandom = evo.noise > 0 || defs.some(s => meta(s).chance);
+  const T = await runSliced(
+    tournamentSteps(defs, { rounds: 200, reps: anyRandom ? 10 : 1, noise: evo.noise / 100, selfPlay: true, seed: hashSeed(evo.seed, 5) }),
+    () => {}, () => token !== evo.token);
+  if (!T) return;
+  const H = evolve(T.M, startMix(nice), evo.gens);
+  evo.result = { defs, nice, H };
+  evo.focus = -1;
+  renderEvoInsights();
+  renderEvoChart(animate);
+  renderReadout(H.length - 1);
+}
+function bandColor(k, nice) {
+  const base = nice ? 'var(--coop)' : 'var(--defect)';
+  return k % 2 === 0 ? base : `color-mix(in oklab, ${base} 55%, var(--tint-to))`;
+}
+function renderEvoChart(animate) {
+  const host = $('#e-chart'), R = evo.result;
+  if (!R || !host.clientWidth) return;
+  cancelAnimationFrame(evo.raf);
+  const W = host.clientWidth, narrow = W < 600;
+  const Hh = narrow ? 260 : 340;
+  const pad = { l: 42, r: narrow ? 8 : 156, t: 8, b: 28 };
+  const G = R.H.length - 1, pw = W - pad.l - pad.r, ph = Hh - pad.t - pad.b;
+  const X = g => pad.l + (g / G) * pw, Y = v => pad.t + (1 - v) * ph;
+  const idx = R.defs.map((_, i) => i);
+  const order = idx.filter(i => R.nice[i]).concat(idx.filter(i => !R.nice[i]));
+  R.color = [];
+  let kn = 0, kx = 0;
+  order.forEach(i => { R.color[i] = R.nice[i] ? bandColor(kn++, true) : bandColor(kx++, false); });
+  R.order = order;
+  const step = Math.max(1, Math.floor(G / 320));
+  const gs = [];
+  for (let g = 0; g <= G; g += step) gs.push(g);
+  if (gs[gs.length - 1] !== G) gs.push(G);
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${Hh}`, width: W, height: Hh, role: 'img', 'aria-label': 'Share of the population held by each strategy over the generations. The list beside the chart gives the values.' });
+  const defs = svgEl('defs');
+  const clip = svgEl('clipPath', { id: 'evo-clip' });
+  const clipRect = svgEl('rect', { x: 0, y: 0, width: animate && !reduced.matches ? pad.l : W, height: Hh });
+  clip.append(clipRect);
+  defs.append(clip);
+  svg.append(defs);
+  const bands = svgEl('g', { 'clip-path': 'url(#evo-clip)' });
+  const lower = new Float64Array(gs.length);
+  order.forEach(i => {
+    const upper = new Float64Array(gs.length);
+    let d = '';
+    for (let q = 0; q < gs.length; q++) { upper[q] = lower[q] + R.H[gs[q]][i]; d += (q ? 'L' : 'M') + X(gs[q]).toFixed(1) + ' ' + Y(Math.min(1, upper[q])).toFixed(1); }
+    for (let q = gs.length - 1; q >= 0; q--) d += 'L' + X(gs[q]).toFixed(1) + ' ' + Y(Math.min(1, lower[q])).toFixed(1);
+    bands.append(svgEl('path', { d: d + 'Z', class: 'band', 'data-i': i, style: `fill:${R.color[i]};stroke:var(--surface);stroke-width:1.5;stroke-linejoin:round` }));
+    lower.set(upper);
+  });
+  svg.append(bands);
+  const ax = svgEl('g', { class: 'ax' });
+  [0, 0.25, 0.5, 0.75, 1].forEach(v => { const t = svgEl('text', { x: pad.l - 8, y: Y(v) + 4, 'text-anchor': 'end' }); t.textContent = pct(v); ax.append(t); });
+  niceTicks(G, narrow ? 3 : 5).forEach(g => {
+    const t = svgEl('text', { x: X(g), y: Hh - 8, 'text-anchor': g === 0 ? 'start' : g >= G ? 'end' : 'middle' });
+    t.textContent = g === 0 && !narrow ? 'Generation 0' : fmtInt(g);
+    ax.append(t);
+  });
+  svg.append(ax);
+  if (!narrow) {
+    const lab = svgEl('g');
+    let acc = 0;
+    const items = [];
+    order.forEach(i => { const v = R.H[G][i]; if (v >= 0.05) items.push({ i, y: Y(acc + v / 2), v }); acc += v; });
+    items.sort((p, q) => p.y - q.y);
+    for (let k = 1; k < items.length; k++) if (items[k].y - items[k - 1].y < 16) items[k].y = items[k - 1].y + 16;
+    items.forEach(it => {
+      const t = svgEl('text', { x: pad.l + pw + 10, y: it.y + 4, class: 'lbl' });
+      t.append(document.createTextNode(truncate(R.defs[it.i].name, 17) + ' '));
+      const ts = svgEl('tspan', { class: 'lbl lbl-v' });
+      ts.textContent = pct(it.v);
+      t.append(ts);
+      lab.append(t);
+    });
+    svg.append(lab);
+  }
+  const cross = svgEl('line', { y1: pad.t, y2: pad.t + ph, style: 'stroke:var(--ink);stroke-width:1', visibility: 'hidden' });
+  svg.append(cross);
+  const hit = svgEl('rect', { x: pad.l, y: pad.t, width: pw, height: ph, fill: 'transparent', style: 'cursor:crosshair' });
+  hit.addEventListener('pointermove', e => {
+    const r = svg.getBoundingClientRect();
+    const sx = (e.clientX - r.left) * (W / r.width), sy = (e.clientY - r.top) * (Hh / r.height);
+    const g = Math.max(0, Math.min(G, Math.round((sx - pad.l) / pw * G)));
+    cross.setAttribute('x1', X(g)); cross.setAttribute('x2', X(g)); cross.setAttribute('visibility', 'visible');
+    const v = 1 - (sy - pad.t) / ph;
+    let acc2 = 0, found = -1;
+    for (const i of order) { acc2 += R.H[g][i]; if (v <= acc2 + 1e-9) { found = i; break; } }
+    evo.focus = found;
+    applyEvoFocus();
+    renderReadout(g);
+  });
+  hit.addEventListener('pointerleave', () => { cross.setAttribute('visibility', 'hidden'); evo.focus = -1; applyEvoFocus(); renderReadout(G); });
+  svg.append(hit);
+  host.replaceChildren(svg);
+  if (animate && !reduced.matches) {
+    const t0 = performance.now(), dur = 1500;
+    const tick = now => {
+      const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      clipRect.setAttribute('width', pad.l + e * (W - pad.l));
+      if (p < 1) evo.raf = requestAnimationFrame(tick);
+    };
+    evo.raf = requestAnimationFrame(tick);
+  }
+}
+function applyEvoFocus() {
+  const host = $('#e-chart');
+  host.classList.toggle('hl', evo.focus >= 0);
+  $$('.band', host).forEach(p => p.classList.toggle('on', +p.dataset.i === evo.focus));
+  $$('#e-readout .ro').forEach(li => li.classList.toggle('on', +li.dataset.i === evo.focus));
+}
+function renderReadout(g) {
+  const R = evo.result;
+  if (!R || !R.color) return;
+  const sh = R.H[g];
+  $('#e-read-title').textContent = `Generation ${fmtInt(g)}`;
+  const ids = R.defs.map((_, i) => i);
+  const alive = ids.filter(i => sh[i] >= 0.0005).sort((a, b) => sh[b] - sh[a]);
+  const gone = ids.filter(i => sh[i] < 0.0005);
+  $('#e-readout').replaceChildren(...alive.map(i => {
+    const li = h('li', { class: 'ro' + (i === evo.focus ? ' on' : ''), 'data-i': i },
+      h('span', { class: 'ro-sw', style: `background:${R.color[i]}` }), h('span', { class: 'ro-name' }, R.defs[i].name), h('span', { class: 'ro-val' }, pct(sh[i], 1)));
+    li.addEventListener('pointerenter', () => { evo.focus = i; applyEvoFocus(); });
+    li.addEventListener('pointerleave', () => { evo.focus = -1; applyEvoFocus(); });
+    return li;
+  }));
+  $('#e-gone').textContent = gone.length ? `Below 0.05% by now: ${gone.map(i => R.defs[i].name).join(', ')}.` : '';
+}
+function renderEvoInsights() {
+  const R = evo.result, H = R.H, G = H.length - 1, n = R.defs.length, fin = H[G], items = [];
+  let top = 0;
+  fin.forEach((v, i) => { if (v > fin[top]) top = i; });
+  items.push([bold(R.defs[top].name), ` ended with the largest share of the population, ${pct(fin[top])}.`]);
+  let best = null;
+  for (let i = 0; i < n; i++) {
+    let peak = 0, gp = 0;
+    for (let g = 0; g <= G; g++) if (H[g][i] > peak) { peak = H[g][i]; gp = g; }
+    const init = H[0][i];
+    if (gp > 0 && peak >= init * 1.25 && peak - init >= 0.01 && fin[i] <= peak * 0.5) {
+      const score = peak / Math.max(init, 1e-6);
+      if (!best || score > best.score) best = { i, peak, gp, init, score };
+    }
+  }
+  if (best) items.push([bold(R.defs[best.i].name), ` grew from ${pct(best.init)} to ${pct(best.peak)} by generation ${best.gp}, then fell to ${pct(fin[best.i], fin[best.i] < 0.01 ? 1 : 0)}.`]);
+  const goneAt = R.defs.map((_, i) => { for (let g = 0; g <= G; g++) if (H[g][i] < 0.001) return g; return -1; });
+  const gone = goneAt.map((g, i) => ({ g, i })).filter(x => x.g >= 0).sort((p, q) => p.g - q.g);
+  if (gone.length) items.push([`${gone.length} of ${n} strategies fell below 0.1% of the population. `, bold(R.defs[gone[0].i].name), ` went first, by generation ${gone[0].g}.`]);
+  if (R.nice.some(Boolean) && R.nice.some(v => !v)) {
+    const share = x => x.reduce((s, v, i) => s + (R.nice[i] ? v : 0), 0);
+    const s0 = share(H[0]), s1 = share(fin);
+    items.push([`Strategies that never defect first went from ${pct(s0)} to ${pct(s1)} of the population.`]);
+  }
+  $('#e-insights').replaceChildren(...items.map(p => h('li', null, p)));
+}
+
+/* ======================= builder ======================= */
+const B = { draft: null, mode: 'new', editId: null, source: null };
+function uniqueName(base) {
+  base = base.slice(0, 40);
+  const names = new Set(all().map(s => s.name.toLowerCase()));
+  if (!names.has(base.toLowerCase())) return base;
+  for (let k = 2; k < 200; k++) { const n = `${base.slice(0, 36)} ${k}`; if (!names.has(n.toLowerCase())) return n; }
+  return base;
+}
+function openBuilder(src) {
+  if (src && src.custom) { B.mode = 'edit'; B.editId = src.id; B.source = src; B.draft = sanitize(src); }
+  else if (src) { B.mode = 'copy'; B.editId = null; B.source = src; B.draft = sanitize(src); B.draft.name = uniqueName(`${src.name} (my version)`); }
+  else {
+    B.mode = 'new'; B.editId = null; B.source = null;
+    B.draft = sanitize({ name: uniqueName('My strategy'), opening: ['C'], rules: [{ when: [{ type: 'theyLast', m: 'D' }], then: { type: 'D' } }], otherwise: { type: 'C' } });
+  }
+  $('#builder-title').textContent = B.mode === 'edit' ? 'Edit strategy' : B.mode === 'copy' ? `Rules of ${src.name}` : 'Build a strategy';
+  const note = $('#b-note');
+  note.hidden = B.mode === 'edit';
+  note.textContent = B.mode === 'copy'
+    ? 'Classic strategies stay as they are. Change anything below and save to add your own version.'
+    : 'This starts out behaving like Tit for Tat. Change the rules, watch the test drive update, then save.';
+  $('#b-name').value = B.draft.name;
+  $('#b-name-err').hidden = true;
+  $('#b-save').textContent = B.mode === 'edit' ? 'Save changes' : 'Save strategy';
+  renderBuilderParts();
+  openLayer('builder', '#b-name');
+  $('#builder .drawer-body').scrollTop = 0;
+}
+function renderBuilderParts(focusKey) {
+  renderOpening();
+  renderRules();
+  renderOtherwise();
+  if (focusKey) { const el = $(`#builder [data-focus="${focusKey}"]`); if (el && !el.disabled) el.focus(); }
+  scheduleTest();
+}
+function renderOpening() {
+  const host = $('#b-opening'), op = B.draft.opening;
+  host.replaceChildren();
+  op.forEach((m, i) => host.append(h('button', {
+    type: 'button', class: 'mchip mchip-' + (m === '?' ? 'r' : m.toLowerCase()), 'data-focus': 'op' + i,
+    'aria-label': `Opening move ${i + 1}: ${moveWord(m)}. Press to change.`,
+    onclick: () => { op[i] = m === 'C' ? 'D' : m === 'D' ? '?' : 'C'; renderBuilderParts('op' + i); },
+  }, m)));
+  host.append(h('button', { type: 'button', class: 'icon-btn', 'data-focus': 'op-add', 'aria-label': 'Add an opening move', title: 'Add a move', disabled: op.length >= 10, html: ICON.plus, onclick: () => { op.push('C'); renderBuilderParts(op.length >= 10 ? 'op-rm' : 'op-add'); } }));
+  host.append(h('button', { type: 'button', class: 'icon-btn', 'data-focus': 'op-rm', 'aria-label': 'Remove the last opening move', title: 'Remove the last move', disabled: op.length <= 1, html: ICON.minus, onclick: () => { op.pop(); renderBuilderParts(op.length <= 1 ? 'op-add' : 'op-rm'); } }));
+}
+function numField(p, obj, key) {
+  const id = 'bf-' + key;
+  const input = h('input', { type: 'number', class: 'num', id, min: String(p.min), max: String(p.max), step: '1', inputmode: 'numeric', 'data-focus': key });
+  input.value = String(obj[p.k]);
+  input.addEventListener('input', () => {
+    const v = Number(input.value);
+    if (input.value !== '' && Number.isFinite(v)) { obj[p.k] = v; scheduleTest(); }
+  });
+  input.addEventListener('change', () => { B.draft = sanitize(B.draft); renderBuilderParts(key); });
+  return h('label', { class: 'numf', for: id }, p.label, input, p.suffix || null);
+}
+function actRow(a, kw, set, key, label) {
+  const row = h('div', { class: 'rline' }, h('span', { class: 'kw' }, kw));
+  const sel = h('select', { class: 'select select-sm', 'aria-label': label, 'data-focus': key });
+  ACT_OPTIONS.forEach(([v, text]) => sel.append(h('option', { value: v }, text)));
+  sel.value = a.type;
+  sel.addEventListener('change', () => { set(fixAction(sel.value === 'random' ? { type: 'random', p: 50 } : { type: sel.value })); renderBuilderParts(key); });
+  row.append(sel);
+  if (a.type === 'random') row.append(numField({ k: 'p', label: 'P', suffix: '%', min: 0, max: 100 }, a, key + '-p'));
+  return row;
+}
+function condRow(r, ri, c, ci) {
+  const row = h('div', { class: 'rline' }, h('span', { class: 'kw' }, ci === 0 ? 'If' : 'and'));
+  const sel = h('select', { class: 'select select-sm', 'aria-label': `Rule ${ri + 1}, condition ${ci + 1}`, 'data-focus': `c${ri}-${ci}` });
+  COND_OPTIONS.forEach(g => sel.append(h('optgroup', { label: g.group }, g.items.map(([v, text]) => h('option', { value: v }, text)))));
+  sel.value = condKey(c);
+  sel.addEventListener('change', () => { r.when[ci] = condFromKey(sel.value); renderBuilderParts(`c${ri}-${ci}`); });
+  row.append(sel);
+  (PARAMS[c.type] || []).forEach(p => row.append(numField(p, c, `c${ri}-${ci}-${p.k}`)));
+  if (r.when.length > 1) row.append(h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Remove this condition', title: 'Remove this condition', html: ICON.x, onclick: () => { r.when.splice(ci, 1); renderBuilderParts(`c${ri}-0`); } }));
+  return row;
+}
+function renderRules() {
+  const host = $('#b-rules'), rules = B.draft.rules;
+  host.replaceChildren();
+  if (!rules.length) host.append(h('li', { class: 'bsec-hint' }, 'No rules yet, so every round after the opening uses the move below.'));
+  rules.forEach((r, ri) => {
+    const body = h('div', { class: 'rule-body' });
+    r.when.forEach((c, ci) => body.append(condRow(r, ri, c, ci)));
+    if (r.when.length < 3) body.append(h('div', null, h('button', { type: 'button', class: 'link-btn', style: 'font-size:13px', 'data-focus': `addc${ri}`, onclick: () => { r.when.push({ type: 'theyLast', m: 'D' }); renderBuilderParts(`c${ri}-${r.when.length - 1}`); } }, 'Add an “and” condition')));
+    body.append(actRow(r.then, 'then', v => { r.then = v; }, `a${ri}`, `Rule ${ri + 1} move`));
+    const moveRule = (from, to) => { const t = rules[from]; rules[from] = rules[to]; rules[to] = t; };
+    const tools = h('div', { class: 'rule-tools' },
+      h('button', { type: 'button', class: 'icon-btn', 'aria-label': `Move rule ${ri + 1} up`, title: 'Move up', 'data-focus': `up${ri}`, disabled: ri === 0, html: ICON.up, onclick: () => { moveRule(ri, ri - 1); renderBuilderParts(ri - 1 === 0 ? 'dn0' : `up${ri - 1}`); } }),
+      h('button', { type: 'button', class: 'icon-btn', 'aria-label': `Move rule ${ri + 1} down`, title: 'Move down', 'data-focus': `dn${ri}`, disabled: ri === rules.length - 1, html: ICON.down, onclick: () => { moveRule(ri, ri + 1); renderBuilderParts(ri + 1 === rules.length - 1 ? `up${ri + 1}` : `dn${ri + 1}`); } }),
+      h('button', { type: 'button', class: 'icon-btn', 'aria-label': `Delete rule ${ri + 1}`, title: 'Delete rule', html: ICON.trash, onclick: () => { rules.splice(ri, 1); renderBuilderParts('b-add'); } }));
+    host.append(h('li', { class: 'rule' }, h('span', { class: 'rule-num', 'aria-hidden': 'true' }, String(ri + 1)), body, tools));
+  });
+  $('#b-add-rule').disabled = rules.length >= 12;
+}
+function renderOtherwise() {
+  const row = actRow(B.draft.otherwise, B.draft.rules.length ? 'Otherwise' : 'Then', v => { B.draft.otherwise = v; }, 'ow', 'Move when no rule matches');
+  $('#b-otherwise').replaceChildren(...Array.from(row.childNodes));
+}
+const scheduleTest = debounce(testDrive, 70);
+function testDrive() {
+  if ($('#builder').hidden) return;
+  const d = sanitize(B.draft), s = compile(d), host = $('#b-test');
+  host.replaceChildren();
+  TD_OPP.forEach((id, k) => {
+    const o = byId(id), oc = compiled(o);
+    const full = playMatch(s, oc, 200, 0, mulberry32(40 + k));
+    const lt = h('div', { class: 'ltape' });
+    host.append(h('div', { class: 'td-item' },
+      h('div', { class: 'td-top' }, h('span', { class: 'td-name' }, `vs ${o.name}`), h('span', { class: 'td-score' }, bold(fmtInt(full.scoreA)), ' to ', fmtInt(full.scoreB))),
+      lt));
+    ltape(lt, [['Yours', full.a.subarray(0, 24)], [o.name, full.b.subarray(0, 24)]], { count: 24, maxCell: 14 });
+  });
+  const nice = isNice(d), chance = usesChance(d);
+  $('#b-badges').replaceChildren(niceBadge(nice), chance ? h('span', { class: 'badge' }, h('i', { class: 'r' }), 'Uses chance') : '');
+}
+function saveBuilder() {
+  const name = $('#b-name').value.replace(/\s+/g, ' ').trim();
+  if (!name) { $('#b-name-err').hidden = false; $('#b-name').focus(); return; }
+  const d = sanitize(Object.assign({}, B.draft, { name }));
+  let msg;
+  if (B.mode === 'edit') {
+    const s = store.customs.find(c => c.id === B.editId);
+    if (s) Object.assign(s, d);
+    msg = `Saved changes to ${d.name}.`;
+    if (h2h.match && (h2h.match.A.id === B.editId || h2h.match.B.id === B.editId)) h2h.match = null;
+  } else {
+    const s = Object.assign(d, { id: newId(), custom: true });
+    store.customs.unshift(s);
+    store.lineup.add(s.id);
+    msg = `Saved ${d.name}. It’s in the tournament lineup.`;
+  }
+  persist();
+  closeLayer('builder');
+  refreshStrategyUI();
+  if (B.mode !== 'edit' && state.tab === 'play') showTab('strategies');
+  toast(msg);
+}
+function shareCode(d) {
+  const json = JSON.stringify({ v: 1, name: d.name, opening: d.opening, rules: d.rules, otherwise: d.otherwise });
+  const bytes = new TextEncoder().encode(json);
+  let bin = '';
+  bytes.forEach(b => { bin += String.fromCharCode(b); });
+  return 'PDA1.' + btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function parseCode(str) {
+  const s = String(str || '').replace(/\s+/g, '');
+  const m = /^PDA1\.([A-Za-z0-9_-]+)$/.exec(s);
+  if (!m) throw new Error('format');
+  let b64 = m[1].replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4) b64 += '=';
+  const bin = atob(b64);
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  const obj = JSON.parse(new TextDecoder().decode(bytes));
+  if (!obj || typeof obj !== 'object') throw new Error('shape');
+  return sanitize(obj);
+}
+function copyShare(d) {
+  const code = shareCode(d);
+  const fallback = () => {
+    $('#code-text').value = code;
+    openLayer('codebox', '#code-text');
+    setTimeout(() => $('#code-text').select(), 60);
+  };
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(() => toast('Share code copied. Anyone can paste it into Import a code.'), fallback);
+    } else fallback();
+  } catch (e) { fallback(); }
+}
+function importCode() {
+  const err = $('#imp-err');
+  let d;
+  try { d = parseCode($('#imp-code').value); } catch (e) {
+    err.textContent = 'That code didn’t work. Check that you copied all of it, starting with PDA1.';
+    err.hidden = false;
+    return;
+  }
+  d.name = uniqueName(d.name);
+  const s = Object.assign(d, { id: newId(), custom: true });
+  store.customs.unshift(s);
+  store.lineup.add(s.id);
+  persist();
+  $('#imp-code').value = '';
+  err.hidden = true;
+  closeLayer('importer');
+  refreshStrategyUI();
+  showTab('strategies');
+  toast(`Imported ${s.name}. It’s in the tournament lineup.`);
+}
+
+/* ======================= wiring ======================= */
+function onThemeChange() {
+  readColors();
+  tapeSet.forEach(t => t.draw());
+  drawMatchTape();
+  if (tour.result && tour.view === 'moves') renderCross(false);
+}
+function bind() {
+  $$('.tab').forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));
+  $('.tabs').addEventListener('keydown', e => {
+    const i = TABS.indexOf(state.tab);
+    let j = -1;
+    if (e.key === 'ArrowRight') j = (i + 1) % TABS.length;
+    else if (e.key === 'ArrowLeft') j = (i - 1 + TABS.length) % TABS.length;
+    else if (e.key === 'Home') j = 0;
+    else if (e.key === 'End') j = TABS.length - 1;
+    if (j >= 0) { e.preventDefault(); showTab(TABS[j]); $('#tab-' + TABS[j]).focus(); }
+  });
+  document.addEventListener('click', e => {
+    const close = e.target.closest('[data-close]');
+    if (close) { closeLayer(close.dataset.close); return; }
+    const g = e.target.closest('[data-goto]');
+    if (g) { e.preventDefault(); showTab(g.dataset.goto); return; }
+    const a = e.target.closest('[data-action]');
+    if (!a) return;
+    switch (a.dataset.action) {
+      case 'new-strategy': openBuilder(null); break;
+      case 'import': $('#imp-err').hidden = true; openLayer('importer', '#imp-code'); break;
+      case 'duel-again': duelNew(); $('#btn-coop').focus({ preventScroll: true }); break;
+      case 'duel-watch': watchPair(duel.oppId, duel.oppId === 'tft' ? 'joss' : 'tft'); break;
+      case 'swap': { const t = h2h.a; h2h.a = h2h.b; h2h.b = t; fillSelects(); h2hStart(); break; }
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && layers.length) { e.preventDefault(); closeLayer(layers[layers.length - 1].id); return; }
+    if (e.key === 'Tab' && layers.length) {
+      const el = $('#' + layers[layers.length - 1].id);
+      const f = $$('button, input, select, textarea', el).filter(x => !x.disabled && x.getClientRects().length);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+      else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+      return;
+    }
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || layers.length || state.tab !== 'play') return;
+    if (e.target && e.target.closest && e.target.closest('input, select, textarea, [contenteditable]')) return;
+    const k = (e.key || '').toLowerCase();
+    if (k === 'c') { e.preventDefault(); duelPlay('C'); }
+    else if (k === 'd') { e.preventDefault(); duelPlay('D'); }
+  });
+  $('#btn-coop').addEventListener('click', () => duelPlay('C'));
+  $('#btn-defect').addEventListener('click', () => duelPlay('D'));
+
+  // head to head
+  $('#h2h-a').addEventListener('change', e => { h2h.a = e.target.value; h2hStart(); });
+  $('#h2h-b').addEventListener('change', e => { h2h.b = e.target.value; h2hStart(); });
+  $('#h2h-rounds').addEventListener('change', e => { h2h.rounds = +e.target.value; h2hStart(); });
+  const h2hNoise = debounce(() => h2hStart(), 200);
+  $('#h2h-noise').addEventListener('input', e => { h2h.noise = +e.target.value; $('#h2h-noise-out').textContent = h2h.noise + '%'; h2hNoise(); });
+  $('#pb-play').addEventListener('click', () => {
+    const m = h2h.match;
+    if (!m) return;
+    if (h2h.playing) { h2h.playing = false; cancelAnimationFrame(h2h.raf); updatePlayBtn(); }
+    else if (h2h.shown >= m.rounds) h2hPlayFrom(0, false);
+    else { h2h.playing = true; h2h.last = performance.now(); h2h.acc = 0; h2h.raf = requestAnimationFrame(h2hTick); updatePlayBtn(); }
+  });
+  $('#pb-end').addEventListener('click', () => {
+    if (!h2h.match) return;
+    cancelAnimationFrame(h2h.raf);
+    h2h.playing = false;
+    h2h.shown = h2h.match.rounds;
+    h2hFrame();
+    h2hDone();
+  });
+  $('#pb-dice').addEventListener('click', () => { h2h.seed++; h2hStart(); });
+  $$('#pb-speed [data-speed]').forEach(b => b.addEventListener('click', () => {
+    h2h.speed = b.dataset.speed;
+    $$('#pb-speed [data-speed]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  }));
+
+  // tournament
+  $('#t-rounds').addEventListener('change', e => { tour.rounds = +e.target.value; runTour(); });
+  $('#t-reps').addEventListener('change', e => { tour.reps = +e.target.value; runTour(); });
+  const tourNoise = debounce(() => runTour(), 250);
+  $('#t-noise').addEventListener('input', e => { tour.noise = +e.target.value; $('#t-noise-out').textContent = tour.noise + '%'; updatePresetState(); tourNoise(); });
+  $('#t-self').addEventListener('change', e => { tour.self = e.target.checked; runTour(); });
+  $('#t-run').addEventListener('click', () => { tour.seed++; runTour(); });
+  $$('#t-view [data-view]').forEach(b => b.addEventListener('click', () => {
+    tour.view = b.dataset.view;
+    $$('#t-view [data-view]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    renderCross(false);
+  }));
+
+  // evolution
+  $('#e-start').addEventListener('change', e => { evo.start = e.target.value; runEvo(true); });
+  $('#e-gens').addEventListener('change', e => { evo.gens = +e.target.value; runEvo(true); });
+  const evoNoise = debounce(() => runEvo(true), 250);
+  $('#e-noise').addEventListener('input', e => { evo.noise = +e.target.value; $('#e-noise-out').textContent = evo.noise + '%'; evoNoise(); });
+  $('#e-run').addEventListener('click', () => { evo.seed++; runEvo(true); });
+
+  // builder & import
+  $('#b-add-rule').addEventListener('click', () => {
+    B.draft.rules.push({ when: [{ type: 'theyLast', m: 'D' }], then: { type: 'D' } });
+    renderBuilderParts(`c${B.draft.rules.length - 1}-0`);
+  });
+  $('#b-name').addEventListener('input', () => { $('#b-name-err').hidden = true; });
+  $('#b-save').addEventListener('click', saveBuilder);
+  $('#b-share').addEventListener('click', () => {
+    const name = $('#b-name').value.replace(/\s+/g, ' ').trim() || B.draft.name;
+    copyShare(sanitize(Object.assign({}, B.draft, { name })));
+  });
+  $('#imp-go').addEventListener('click', importCode);
+
+  // redraw on size and theme changes
+  const lastW = {};
+  const chartRO = new ResizeObserver(entries => {
+    for (const e of entries) {
+      const id = e.target.id, w = Math.round(e.contentRect.width);
+      const first = !(id in lastW);
+      if (lastW[id] === w) continue;
+      lastW[id] = w;
+      if (first) continue;
+      if (id === 'match-tape') drawMatchTape();
+      else if (id === 'match-race') drawRace();
+      else if (id === 'e-chart' && evo.result) { renderEvoChart(false); renderReadout(evo.result.H.length - 1); }
+    }
+  });
+  ['#match-tape', '#match-race', '#e-chart'].forEach(s => chartRO.observe($(s)));
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  if (mq.addEventListener) mq.addEventListener('change', onThemeChange);
+  new MutationObserver(onThemeChange).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+}
+function init() {
+  readColors();
+  load();
+  bind();
+  renderPresets();
+  renderLineupChips();
+  syncTourControls();
+  syncH2hControls();
+  updatePlayBtn();
+  renderStrategies();
+  renderTraitDemos();
+  duelNew();
+  updateEvoNote();
+  const hash = (location.hash || '').replace('#', '');
+  showTab(TABS.includes(hash) ? hash : 'play', { noHash: true, keepScroll: true });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { drawMatchTape(); });
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+
+})();
+</script>
+<script>
+(function () {
+  var a = document.querySelector('.lang-link');
+  if (!a) return;
+  var base = a.getAttribute('href');
+  if (location.protocol === 'file:') base += 'index.html';
+  var sync = function () { a.href = base + (location.hash || ''); };
+  sync();
+  ['pointerdown', 'focus', 'click'].forEach(function (ev) { a.addEventListener(ev, sync); });
+})();
+</script>
+</body>
+</html>

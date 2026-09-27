@@ -1,5 +1,7 @@
 # ร่วมมือหรือหักหลัง · Prisoner's Dilemma Arena
 
+Created by [Suwitcha “Pondd” Sugthana](https://pond1982.github.io/Pondd-Page/).
+
 An interactive explainer of the repeated prisoner's dilemma and Axelrod's strategy tournaments. You can play a few rounds yourself, watch classic strategies face each other, run round-robin tournaments and evolution, and build your own strategy.
 
 - **Thai** (home page): `index.html`

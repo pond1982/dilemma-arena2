@@ -485,6 +485,8 @@ textarea.text-input { font-size: 14px; font-weight: 500; resize: vertical; font-
 <meta property="og:description" content="Play the repeated prisoner's dilemma, watch classic strategies face off, run Axelrod-style tournaments and evolution, and build your own strategy.">
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary">
+<meta name="author" content="Suwitcha “Pondd” Sugthana">
+<link rel="author" href="https://pond1982.github.io/Pondd-Page/">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="alternate" hreflang="th" href="../">
@@ -499,6 +501,13 @@ img { max-width: 100%; }
 @media (max-width: 420px) { .topbar-inner { column-gap: 12px; } .lang-link svg { display: none; } }
 @media (max-width: 380px) { .brand-mark { display: none; } }
 @media (max-width: 340px) { .btn-build .short { display: none; } .btn-build { padding-inline: 8px; } }
+.site-foot { border-top: 1px solid var(--line); }
+.site-foot-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding-block: 26px 34px; }
+.site-foot .foot-brand { flex: none; font-size: 16px; color: var(--ink-2); }
+.credit { margin: 0; font-size: 15px; line-height: 1.6; color: var(--ink-3); }
+.credit a { color: var(--ink); font-weight: 600; white-space: nowrap; text-decoration: underline; text-decoration-color: var(--line-strong); text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+.credit a:hover { text-decoration-color: currentColor; }
+.credit svg { width: 11px; height: 11px; margin-left: 5px; }
 </style>
 </head>
 <body>
@@ -819,6 +828,22 @@ img { max-width: 100%; }
     </div>
   </section>
 </main>
+
+<footer class="site-foot">
+  <div class="wrap site-foot-inner">
+    <span class="brand foot-brand"><svg class="brand-mark" viewBox="0 0 38 18" aria-hidden="true">
+        <rect x="0" y="0" width="8" height="8" rx="2" style="fill:var(--coop)"/>
+        <rect x="10" y="0" width="8" height="8" rx="2" style="fill:var(--coop)"/>
+        <rect x="20" y="0" width="8" height="8" rx="2" style="fill:var(--defect)"/>
+        <rect x="30" y="0" width="8" height="8" rx="2" style="fill:var(--coop)"/>
+        <rect x="0" y="10" width="8" height="8" rx="2" style="fill:var(--coop)"/>
+        <rect x="10" y="10" width="8" height="8" rx="2" style="fill:var(--coop)"/>
+        <rect x="20" y="10" width="8" height="8" rx="2" style="fill:var(--coop)"/>
+        <rect x="30" y="10" width="8" height="8" rx="2" style="fill:var(--defect)"/>
+      </svg><span>Dilemma Arena</span></span>
+    <p class="credit">Created by <a href="https://pond1982.github.io/Pondd-Page/" rel="author noopener" target="_blank">Suwitcha “Pondd” Sugthana<span class="sr-only"> (opens in a new tab)</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4.25 2.75h5v5M9 3 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
+  </div>
+</footer>
 
 <!-- ============ BUILDER ============ -->
 <div class="drawer" id="builder" hidden>
